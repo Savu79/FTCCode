@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.SensorColor;
 
-@TeleOp(name="test motor", group="drive")
+@TeleOp(name="test motor", group="test")
 public class TestMotor extends LinearOpMode {
     public void runOpMode(){
         DcMotorEx motor;

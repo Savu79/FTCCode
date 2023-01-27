@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.util.CVMaster;
 
-@TeleOp(name = "StickObserverTest")
+@TeleOp(name = "StickObserverTest", group="test")
 
 public class StickObserverTest extends LinearOpMode {
 

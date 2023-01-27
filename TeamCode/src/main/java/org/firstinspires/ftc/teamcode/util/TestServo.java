@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name="test servo", group="drive")
+@TeleOp(name="test servo", group="test")
 public class TestServo extends LinearOpMode {
     public void runOpMode(){
         Servo Intake;

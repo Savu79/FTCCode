@@ -15,8 +15,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-@TeleOp (name="gamepadTest", group = "drive")
 
+@TeleOp (name="gamepadTest", group = "drive")
 public class gamepadTest extends LinearOpMode {
     public void runOpMode()
     {
