@@ -10,7 +10,7 @@ public class ServoBrat extends LinearOpMode {
         Servo BratServo;
         BratServo=hardwareMap.get(Servo.class, "BratServo");
         int k=0;
-        double poz=0;
+        double poz=1;
         waitForStart();
         while(opModeIsActive()){
             BratServo.setPosition(poz);
@@ -21,11 +21,20 @@ public class ServoBrat extends LinearOpMode {
                     poz=0;
                 }
                 else{
-                    poz=1;
+                    poz=0.5;
                 }
             }
             k++;
             sleep(150);
+            if (gamepad1.right_stick_y!=0 && poz<=1 && poz>=0.5){
+                poz+=gamepad1.right_stick_y/100;
+            }
+            if(poz>1){
+                poz=1;
+            }
+            if(poz<0.5){
+                poz=0.5;
+            }
         }
     }
 }
