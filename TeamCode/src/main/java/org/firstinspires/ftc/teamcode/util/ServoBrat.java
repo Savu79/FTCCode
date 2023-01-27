@@ -1,4 +1,4 @@
-/*package org.firstinspires.ftc.teamcode.util;
+package org.firstinspires.ftc.teamcode.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name="ServoBrat", group="drive")
 public class ServoBrat extends LinearOpMode {
-    public void runOpmode(){
+    public void runOpMode(){
         Servo BratServo;
         BratServo=hardwareMap.get(Servo.class, "BratServo");
         int k=0;
@@ -29,4 +29,3 @@ public class ServoBrat extends LinearOpMode {
         }
     }
 }
- */
