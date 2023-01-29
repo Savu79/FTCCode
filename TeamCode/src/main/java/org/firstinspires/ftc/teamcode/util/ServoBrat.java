@@ -38,7 +38,7 @@ public class ServoBrat extends LinearOpMode {
             }
             k++;
             sleep(150);
-            if (gamepad1.right_stick_y!=0 && poz<=pozMaxB && poz>=pozMinB{
+            if (gamepad1.right_stick_y!=0 && poz<=pozMaxB && poz>=pozMinB){
                 poz+=gamepad1.right_stick_y/vitBrat;
             }
             if(poz>pozMaxB){
