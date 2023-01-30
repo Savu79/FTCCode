@@ -22,7 +22,7 @@ public class Extindor extends LinearOpMode {
     public static int EDeschis=3400;
     int pozESt=EInchis;
     int pozEDr=EInchis;
-    public static double Kp=1;
+    public static double Kp=0.01;
     @Override
     public void runOpMode(){
 

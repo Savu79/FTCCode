@@ -13,9 +13,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @TeleOp(name="ServoBrat", group="drive")
 public class ServoBrat extends LinearOpMode {
 
-    public static double pozMaxB=1;
-    public static double pozMinB=0.5;
-    public static int vitBrat=40;
+    public static double pozMaxB=0.95;
+    public static double pozMinB=0.3;
+    public static double vitBrat=0.2;
 
     public void runOpMode(){
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -39,7 +39,7 @@ public class ServoBrat extends LinearOpMode {
             k++;
             sleep(150);
             if (gamepad1.right_stick_y!=0 && poz<=pozMaxB && poz>=pozMinB){
-                poz+=gamepad1.right_stick_y/vitBrat;
+                poz+=gamepad1.right_stick_y*vitBrat;
             }
             if(poz>pozMaxB){
                 poz=pozMaxB;
