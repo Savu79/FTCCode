@@ -1,28 +1,35 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 public class CVMaster {
-    private OpenCvWebcam webcam;
+    private OpenCvCamera camera;
     private StickObserverPipeline opencv = null;
     private LinearOpMode op;
     public CVMaster(LinearOpMode p_op){
         //you can input  a hardwareMap instead of linearOpMode if you want
         op = p_op;
         //initialize webcam
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(op.hardwareMap.get(WebcamName.class, "webcam"));
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
+        OpenCvCamera camera = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+
     }
     public void observeStick(){
         //create the pipeline
         opencv = new StickObserverPipeline();
 
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
@@ -43,11 +50,11 @@ public class CVMaster {
                  * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
                  * away from the user.
                  */
-                webcam.setPipeline(opencv);
+                camera.setPipeline(opencv);
                 //start streaming the camera
-                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+                camera.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
                 //if you are using dashboard, update dashboard camera view
-                /*FtcDashboard.getInstance().startCameraStream(webcam, 5);*/
+                FtcDashboard.getInstance().startCameraStream(camera, 5);
 
             }
 
@@ -63,6 +70,6 @@ public class CVMaster {
 
     //stop streaming
     public void stopCamera(){
-        webcam.stopStreaming();
+        camera.stopStreaming();
     }
 }
