@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.util;
+/*package org.firstinspires.ftc.teamcode.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -23,5 +23,5 @@ public class StickObserverTest extends LinearOpMode {
         }
         cv.stopCamera();
     }
-}
+}*/
 

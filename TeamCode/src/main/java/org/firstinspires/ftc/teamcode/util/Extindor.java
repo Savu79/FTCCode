@@ -80,10 +80,10 @@ public class Extindor extends LinearOpMode {
                 pozESt+=-gamepad1.right_stick_y*20;
                 pozEDr+=-gamepad1.right_stick_y*20;
             }
-            telemetry.addData("ExtindorSt: ", ExtindorSt.getPower());
-            telemetry.addData("ExtindorDr: ", ExtindorDr.getPower());
-            telemetry.addData("Directie ", ExtindorSt.getDirection());
-            telemetry.addData("Mode: ", ExtindorSt.getMode());
+            telemetry.addData("ExtindorSt power: ", ExtindorSt.getPower());
+            telemetry.addData("ExtindorDr power: ", ExtindorDr.getPower());
+            telemetry.addData("pozSt" ,pozESt);
+            telemetry.addData("pozDr", pozEDr);
             telemetry.update();
         }
     }

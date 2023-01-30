@@ -28,7 +28,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 
 import java.util.ArrayList;
-@TeleOp (name="OpenCvTestSavu", group="drive")
+@TeleOp(name="OPENCV", group= "drive")
 public class OPENCVTESTTSTSTTS extends OpMode {
     static final int STREAM_WIDTH = 1920; // modify for your camera
     static final int STREAM_HEIGHT = 1080; // modify for your camera

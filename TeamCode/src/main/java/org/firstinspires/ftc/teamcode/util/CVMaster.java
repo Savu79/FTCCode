@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.util;
+/*package org.firstinspires.ftc.teamcode.util;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
@@ -49,7 +49,7 @@ public class CVMaster {
                  * For a front facing camera, rotation is defined assuming the user is looking at the screen.
                  * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
                  * away from the user.
-                 */
+                 *
                 camera.setPipeline(opencv);
                 //start streaming the camera
                 camera.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
@@ -63,7 +63,7 @@ public class CVMaster {
             {
                 /*
                  * This will be called if the camera could not be opened
-                 */
+                 *
             }
         });
     }
@@ -73,3 +73,4 @@ public class CVMaster {
         camera.stopStreaming();
     }
 }
+*/

@@ -64,7 +64,7 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
     // private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/CustomTeamModel.tflite";
 
     private static final String[] LABELS = {
-      "1 Bolt",
+      "1 ",
       "2 Bulb",
       "3 Panel"
     };
