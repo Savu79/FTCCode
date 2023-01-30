@@ -19,7 +19,7 @@ public class Extindor extends LinearOpMode {
     DcMotorEx ExtindorSt;
     DcMotorEx ExtindorDr;
     public static int EInchis=0;
-    public static int EDeschis=3400;
+    public static int EDeschis=3550;
     int pozESt=EInchis;
     int pozEDr=EInchis;
     public static double Kp=0.01;
@@ -59,10 +59,10 @@ public class Extindor extends LinearOpMode {
                 pozESt+=-gamepad1.right_stick_y*20;
                 pozEDr+=-gamepad1.right_stick_y*20;
             }
-            telemetry.addData("ExtindorSt: ", pozESt);
-            telemetry.addData("ExtindorDr: ", pozEDr);
-            telemetry.addData("ExtindorSt: ", ExtindorSt.getDirection());
-            telemetry.addData("ExtindorSt: ", ExtindorSt.getMode());
+            telemetry.addData("ExtindorSt: ", ExtindorSt.getPower());
+            telemetry.addData("ExtindorDr: ", ExtindorDr.getPower());
+            telemetry.addData("Directie ", ExtindorSt.getDirection());
+            telemetry.addData("Mode: ", ExtindorSt.getMode());
             telemetry.update();
         }
     }
