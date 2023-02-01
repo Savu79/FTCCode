@@ -35,6 +35,7 @@ public class Extindor extends LinearOpMode {
     public static double Kp=0.01;
     public static double Ki=0;
     public static double Kd=0;
+    public static double integralSumLim=0.25/Ki;
     @Override
     public void runOpMode(){
 
@@ -55,12 +56,22 @@ public class Extindor extends LinearOpMode {
             errorDr=pozEDr-ExtindorDr.getCurrentPosition();
             integralSumSt = integralSumSt + (errorSt * timer.seconds());
             integralSumDr = integralSumDr + (errorDr * timer.seconds());
+            if (integralSumSt > integralSumLim)
+                integralSumSt=integralSumLim;
+            if (integralSumDr > integralSumLim)
+                integralSumDr=integralSumLim;
+            if (integralSumSt < -integralSumLim)
+                integralSumSt= -integralSumLim;
+            if (integralSumDr < -integralSumLim)
+                integralSumDr= -integralSumLim;
+
             derivativeSt = (errorSt-lastErrorSt) / timer.seconds();
             derivativeDr = (errorDr-lastErrorDr) / timer.seconds();
             ExtindorSt.setPower(  (errorSt*Kp)  +  (integralSumSt*Ki)  + (derivativeSt*Kd)  );
             ExtindorDr.setPower(  (errorDr*Kp)  +  (integralSumDr*Ki)  + (derivativeDr*Kd)  );
             lastErrorSt=errorSt;
             lastErrorDr=errorDr;
+            timer.reset();
             if(gamepad1.x) {
                 pozESt=EInchis;
                 pozEDr=EInchis;

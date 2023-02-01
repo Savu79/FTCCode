@@ -55,6 +55,7 @@ public class PIDMotor extends LinearOpMode {
             telemetry.addData("Pozitie reala ", motor.getCurrentPosition());
             telemetry.addData("Puterea data motorului ", power);
             telemetry.update();
+
         }
     }
     public double PIDControl(double reference, double state)
