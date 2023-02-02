@@ -55,11 +55,11 @@ public class Test_extindor extends LinearOpMode {
                 }
                 if (gamepad1.right_stick_button)
                 {
-                    ExtindorDr.setMode(DcMotor.RunMode.RESET_ENCODERS);
+                    ExtindorDr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }
                 if (gamepad1.left_stick_button)
                 {
-                    ExtindorSt.setMode(DcMotor.RunMode.RESET_ENCODERS);
+                    ExtindorSt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }
             }
             else {
@@ -75,8 +75,8 @@ public class Test_extindor extends LinearOpMode {
                 }
                 if (gamepad1.right_stick_button)
                 {
-                    ExtindorDr.setMode(DcMotor.RunMode.RESET_ENCODERS);
-                    ExtindorSt.setMode(DcMotor.RunMode.RESET_ENCODERS);
+                    ExtindorDr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    ExtindorSt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }
             }
         }
