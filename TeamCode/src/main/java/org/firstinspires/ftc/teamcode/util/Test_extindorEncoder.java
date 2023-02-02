@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.util;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -9,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-
+@Config
 @TeleOp(name="Test ExtindorEncoder", group= "test")
 public class Test_extindorEncoder extends LinearOpMode {
 
@@ -18,17 +19,17 @@ public class Test_extindorEncoder extends LinearOpMode {
     public static int EInchis=0;
     public static int EDeschis=2700;
     int poz=EInchis;
-    double power=0.5;
-    double kx=20;
+    public static double power=0.5;
+    public static double kx=20;
     public void runOpMode(){
         DcMotorEx ExtindorSt;
         DcMotorEx ExtindorDr;
         ExtindorSt = hardwareMap.get(DcMotorEx.class, "ExtindorSt");
         ExtindorDr = hardwareMap.get(DcMotorEx.class, "ExtindorDr");
+        ExtindorSt.setDirection(DcMotorSimple.Direction.REVERSE);
+        ExtindorDr.setDirection(DcMotorSimple.Direction.REVERSE);
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        ExtindorDr.setDirection(DcMotorSimple.Direction.REVERSE);
-        ExtindorSt.setDirection(DcMotorSimple.Direction.REVERSE);
         ExtindorSt.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         ExtindorDr.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         ExtindorSt.setTargetPosition(EInchis);
@@ -79,15 +80,16 @@ public class Test_extindorEncoder extends LinearOpMode {
                 telemetry.addData("pozDr",ExtindorDr.getCurrentPosition());
                 telemetry.addData("pozSt",ExtindorSt.getCurrentPosition());
                 telemetry.update();
-                /*power=gamepad1.right_stick_y;
+
                 if (gamepad1.right_stick_button)
                 {
                     ExtindorDr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     ExtindorSt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }
-            }*/
+            if(gamepad1.b) poz=EDeschis;
+            if(gamepad1.a) poz=EInchis;
             if (gamepad1.right_stick_y!=0 && poz<=EDeschis && poz>=EInchis){
-                poz+=gamepad1.right_stick_y*kx;
+                poz-=gamepad1.right_stick_y*kx;
             }
             if (poz<EInchis)
             {
