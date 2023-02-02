@@ -17,11 +17,11 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Extindor extends LinearOpMode {
 
-
     DcMotorEx ExtindorSt;
     DcMotorEx ExtindorDr;
     public static int EInchis=0;
     public static int EDeschis=3550;
+    public static double a=0;
     int errorSt;
     int errorDr;
     double integralSumDr;
@@ -32,10 +32,18 @@ public class Extindor extends LinearOpMode {
     int lastErrorDr=0;
     int pozESt=EInchis;
     int pozEDr=EInchis;
+    int reference=EInchis;
+    int lastReference=reference;
+
+    float currentFilterEstimateSt;
+    float currentFilterEstimateDr;
+    float previousFilterEstimateSt;
+    float previousFilterEstimateDr;
     public static double Kp=0.01;
     public static double Ki=0;
     public static double Kd=0;
-    public static double integralSumLim=0.25/Ki;
+    public static double integralSumLim=0;
+    ElapsedTime timer = new ElapsedTime();
     @Override
     public void runOpMode(){
 
@@ -49,13 +57,33 @@ public class Extindor extends LinearOpMode {
         ExtindorSt.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
-        ElapsedTime timer = new ElapsedTime();
+
+        ElapsedTime timerD = new ElapsedTime();
         while(opModeIsActive())
         {
+            lastReference=reference;
+            reference= pozEDr;
+
             errorSt=pozESt-ExtindorSt.getCurrentPosition();
             errorDr=pozEDr-ExtindorDr.getCurrentPosition();
+
+            currentFilterEstimateDr = ((float)a * previousFilterEstimateDr) + (1-(float)a) * (errorDr-lastErrorDr);
+            currentFilterEstimateSt = ((float)a * previousFilterEstimateSt) + (1-(float)a) * (errorSt-lastErrorSt);
+
             integralSumSt = integralSumSt + (errorSt * timer.seconds());
             integralSumDr = integralSumDr + (errorDr * timer.seconds());
+
+            derivativeSt = currentFilterEstimateSt / timer.seconds();
+            derivativeDr = currentFilterEstimateDr / timer.seconds();
+
+            lastErrorSt=errorSt;
+            lastErrorDr=errorDr;
+
+            previousFilterEstimateDr = currentFilterEstimateDr;
+            previousFilterEstimateSt = currentFilterEstimateSt;
+
+            timer.reset();
+
             if (integralSumSt > integralSumLim)
                 integralSumSt=integralSumLim;
             if (integralSumDr > integralSumLim)
@@ -64,14 +92,14 @@ public class Extindor extends LinearOpMode {
                 integralSumSt= -integralSumLim;
             if (integralSumDr < -integralSumLim)
                 integralSumDr= -integralSumLim;
-
-            derivativeSt = (errorSt-lastErrorSt) / timer.seconds();
-            derivativeDr = (errorDr-lastErrorDr) / timer.seconds();
+            if(reference!=lastReference)
+            {
+                integralSumSt=0;
+                integralSumDr=0;
+            }
             ExtindorSt.setPower(  (errorSt*Kp)  +  (integralSumSt*Ki)  + (derivativeSt*Kd)  );
             ExtindorDr.setPower(  (errorDr*Kp)  +  (integralSumDr*Ki)  + (derivativeDr*Kd)  );
-            lastErrorSt=errorSt;
-            lastErrorDr=errorDr;
-            timer.reset();
+
             if(gamepad1.x) {
                 pozESt=EInchis;
                 pozEDr=EInchis;
@@ -91,10 +119,17 @@ public class Extindor extends LinearOpMode {
                 pozESt+=-gamepad1.right_stick_y*20;
                 pozEDr+=-gamepad1.right_stick_y*20;
             }
+
+            if(gamepad1.left_stick_y!=0)
+                pozEDr+=-gamepad1.right_stick_y*20;
+
             telemetry.addData("ExtindorSt power: ", ExtindorSt.getPower());
             telemetry.addData("ExtindorDr power: ", ExtindorDr.getPower());
-            telemetry.addData("pozSt" ,pozESt);
-            telemetry.addData("pozDr", pozEDr);
+            telemetry.addData("pozSt" ,pozESt*0.001);
+            telemetry.addData("pozDr", pozEDr*0.001);
+            telemetry.addData("ExtindorSt pozitie(ticks): ", (double)ExtindorSt.getCurrentPosition()/1000);
+            telemetry.addData("ExtindorDr pozitie(ticks): ", (double)ExtindorDr.getCurrentPosition()/1000);
+
             telemetry.update();
         }
     }
