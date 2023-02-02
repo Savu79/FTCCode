@@ -12,8 +12,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @TeleOp(name="Test Extindor", group= "test")
 public class Test_extindor extends LinearOpMode {
-    DcMotorEx ExtindorSt;
-    DcMotorEx ExtindorDr;
+
     public static int EInchis=0;
     public static int EDeschis=3550;
     double power=0;
@@ -21,6 +20,10 @@ public class Test_extindor extends LinearOpMode {
     double powerSt=0;
     boolean SEPARAT=true;
     public void runOpMode(){
+        DcMotorEx ExtindorSt;
+        DcMotorEx ExtindorDr;
+        ExtindorSt= hardwareMap.get(DcMotorEx.class, "ExtindorSt");
+        ExtindorDr= hardwareMap.get(DcMotorEx.class, "ExtindorDr");
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         ExtindorDr.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -32,10 +35,12 @@ public class Test_extindor extends LinearOpMode {
             if (gamepad1.right_bumper)
             {
                 SEPARAT=true;
+                telemetry.clear();
             }
             if (gamepad1.left_bumper)
             {
                 SEPARAT=false;
+                telemetry.clear();
             }
             if (SEPARAT){
                 ExtindorDr.setPower(powerDr);
@@ -45,14 +50,8 @@ public class Test_extindor extends LinearOpMode {
                 telemetry.addData("pozDr",ExtindorDr.getCurrentPosition());
                 telemetry.addData("pozSt",ExtindorSt.getCurrentPosition());
                 telemetry.update();
-                if(gamepad1.left_stick_y!=0)
-                {
-                    powerSt=gamepad1.left_stick_y;
-                }
-                if (gamepad1.right_stick_y!=0)
-                {
-                    powerDr=gamepad1.right_stick_y;
-                }
+                powerSt=gamepad1.left_stick_y;
+                powerDr=gamepad1.right_stick_y;
                 if (gamepad1.right_stick_button)
                 {
                     ExtindorDr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -69,10 +68,7 @@ public class Test_extindor extends LinearOpMode {
                 telemetry.addData("pozDr",ExtindorDr.getCurrentPosition());
                 telemetry.addData("pozSt",ExtindorSt.getCurrentPosition());
                 telemetry.update();
-                if (gamepad1.right_stick_y!=0)
-                {
-                    power=gamepad1.right_stick_y;
-                }
+                power=gamepad1.right_stick_y;
                 if (gamepad1.right_stick_button)
                 {
                     ExtindorDr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
