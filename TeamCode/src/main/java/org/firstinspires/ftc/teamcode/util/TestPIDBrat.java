@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -50,7 +51,7 @@ public class TestPIDBrat extends LinearOpMode {
 
         Brat=hardwareMap.get(DcMotorEx.class, "Brat");
 
-        //Brat.setDirection(DcMotorSimple.Direction.REVERSE);
+        Brat.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
 
