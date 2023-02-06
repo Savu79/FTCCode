@@ -57,7 +57,9 @@ public class DriverControl extends LinearOpMode {
         public static double powerE = 1;
         public static double kx = 20;
 
-
+    //Mod emi-autonom
+    boolean loopsingur=false;
+    int EDeschisLoop;
 
 
 
@@ -85,7 +87,7 @@ public class DriverControl extends LinearOpMode {
 
         ExtindorSt.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         ExtindorDr.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        ExtindorSt.setTargetPosition(EInchis);
+        ExtindorDr.setTargetPosition(EInchis);
         ExtindorSt.setTargetPosition(EInchis);
         ExtindorSt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         ExtindorDr.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
@@ -98,6 +100,21 @@ public class DriverControl extends LinearOpMode {
 
         while (opModeIsActive() && !isStopRequested()) {
 
+            //Mod semi-automat
+            if (gamepad2.dpad_up)
+            {
+                loopsingur=true;
+                EDeschisLoop=ExtindorDr.getCurrentPosition();
+            }
+
+            while (loopsingur==true && gamepad2.dpad_down==false)
+            {
+                ExtindorDr.setTargetPosition(EDeschisLoop);
+                ExtindorSt.setTargetPosition(EDeschisLoop);
+
+            }
+            loopsingur=false;
+
             // Viteze - gamepad1
             if(gamepad1.dpad_left)  vit=3;
             if(gamepad1.dpad_down)  vit=2;
@@ -106,7 +123,7 @@ public class DriverControl extends LinearOpMode {
             // Condus  - gamepad1
             drive.setWeightedDrivePower(
                     new Pose2d(
-                            gamepad1.left_stick_y/vit,
+                            -gamepad1.left_stick_y/vit,
                             -gamepad1.right_stick_x/vit,
                             -gamepad1.left_stick_x/vit
                     )
