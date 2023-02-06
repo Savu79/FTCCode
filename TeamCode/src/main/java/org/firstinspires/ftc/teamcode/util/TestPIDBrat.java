@@ -91,9 +91,9 @@ public class TestPIDBrat extends LinearOpMode {
 
             Brat.setPower((error*Kp) + (integralSum*Ki) + (derivative*Kd));
 
-            telemetry.addData("ExtindorSt power: ", Brat.getPower());
+            telemetry.addData("Brat power: ", Brat.getPower());
             telemetry.addData("pozSt" ,pozB*0.001);
-            telemetry.addData("ExtindorSt pozitie(ticks): ", (double)Brat.getCurrentPosition()/(double)1000);
+            telemetry.addData("Brat pozitie(ticks): ", (double)Brat.getCurrentPosition()/(double)1000);
             telemetry.update();
         }
     }

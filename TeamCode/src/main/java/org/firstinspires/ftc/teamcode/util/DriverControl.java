@@ -22,80 +22,88 @@ public class DriverControl extends LinearOpMode {
     boolean x=false, y=false;
     int vit=1;
 
-    //Servo St&Dr
-    double JosSt=0.04;
-    double JosDr=0.96;
-    double SusSt=0.57;
-    double SusDr=0.43;
-    double pozSt = JosSt;
-    double pozDr = JosDr;
-    double kx=20;
-
     //Brat
-    int SBrat=2000;
-    int JBrat=0;
-    int pozBrat=JBrat;
-    int ky=50;
-    double pwrBrat=0.5;
+    public static int BInchis=10;
+    public static int BDeschis=2200;
 
-    //Intake
-    double DIntake=0;
-    double IIntake=0.17;
-    double pozIntake=DIntake;
+    public static double a=0;
 
-    //Spinner
-    int StartSpinner=0;
-    int FinishSpinner=2900;
-    double pwrSpinner=0.5;
-    int kS=30;
-    boolean St=false;
-    boolean Dr=false;
+    public static double Kp=0.007;
+    public static double Ki=0.002;
+    public static double Kd=0;
 
-    int pozSpinner=StartSpinner;
+    int reference=BInchis;
+    int lastReference=reference;
 
-    Servo ServoSt;
-    Servo ServoDr;
-    Servo Intake;
+    int error;
+    int lastError;
+
+    double integralSum=0;
+    public static double integralSumLim=3;
+
+    double derivative;
+    float currentFilterEstimate;
+    float previousFilterEstimate;
+
+    int pozB;
+
+    ElapsedTime timer = new ElapsedTime();
+
+
+    //Extindor
+        public static int EInchis = 0;
+        public static int EDeschis = 2700;
+        int pozE = EInchis;
+        public static double powerE = 1;
+        public static double kx = 20;
+
+
+
+
+
+
+    DcMotorEx ExtindorDr;
+    DcMotorEx ExtindorSt;
     DcMotorEx Brat;
-    DcMotorEx Spinner;
 
     ElapsedTime timerY1 = new ElapsedTime();
     ElapsedTime timerX2 = new ElapsedTime();
 
     public void runOpMode() throws InterruptedException {
 
+        Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        ServoDr = hardwareMap.get(Servo.class,"ServoDr");
-        ServoSt = hardwareMap.get(Servo.class,"ServoSt");
-        Intake  = hardwareMap.get(Servo.class, "Intake");
-        Brat    = hardwareMap.get(DcMotorEx.class, "Brat");
-        Spinner = hardwareMap.get(DcMotorEx.class, "Spinner");
+           Brat    = hardwareMap.get(DcMotorEx.class, "Brat");
+        ExtindorDr = hardwareMap.get(DcMotorEx.class, "ExtindorDr");
+        ExtindorSt = hardwareMap.get(DcMotorEx.class, "ExtindorSt");
 
-        Spinner.setDirection(DcMotorSimple.Direction.REVERSE);
-        Brat.setDirection(DcMotorSimple.Direction.REVERSE);
+              Brat.setDirection(DcMotorSimple.Direction.REVERSE);
+        ExtindorSt.setDirection(DcMotorSimple.Direction.REVERSE);
+        ExtindorDr.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        Brat.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        Spinner.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Brat.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
+        ExtindorSt.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        ExtindorDr.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        ExtindorSt.setTargetPosition(EInchis);
+        ExtindorSt.setTargetPosition(EInchis);
+        ExtindorSt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        ExtindorDr.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        ExtindorDr.setPower(powerE);
+        ExtindorSt.setPower(powerE);
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        Brat.setTargetPosition(JBrat);
-        Brat.setMode(DcMotor.RunMode.RUN_TO_POSITION) ;
-        Brat.setPower(pwrBrat);
-
-        Spinner.setTargetPosition(StartSpinner);
-        Spinner.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Spinner.setPower(pwrSpinner);
 
         waitForStart();
 
         while (opModeIsActive() && !isStopRequested()) {
 
-            // Viteze
+            // Viteze - gamepad1
             if(gamepad1.dpad_left)  vit=3;
             if(gamepad1.dpad_down)  vit=2;
             if(gamepad1.dpad_right) vit=1;
 
-            // Condus
+            // Condus  - gamepad1
             drive.setWeightedDrivePower(
                     new Pose2d(
                             gamepad1.left_stick_y/vit,
@@ -104,89 +112,74 @@ public class DriverControl extends LinearOpMode {
                     )
             );
             drive.update();
-            telemetry.addData("update","update");
-            telemetry.update();
-            // Motoare/Servouri
-            ServoSt.setPosition(pozSt);
-            ServoDr.setPosition(pozDr);
-            Intake.setPosition(pozIntake);
-            Brat.setTargetPosition(pozBrat);
-            Spinner.setTargetPosition(pozSpinner);
+            Pose2d poseEstimate = drive.getPoseEstimate();
+
+            //Brat   - gamepad2
+            lastReference=reference;
+            reference=pozB;
+
+            error=pozB-Brat.getCurrentPosition();
+
+            currentFilterEstimate=(float)a*previousFilterEstimate + (1-(float)a*(error-lastError));
+
+            integralSum+=error*timer.seconds();
+
+            derivative=currentFilterEstimate/timer.seconds();
+
+            previousFilterEstimate=currentFilterEstimate;
+
+            timer.reset();
+
+            if (integralSum > integralSumLim)
+                integralSum=integralSumLim;
+            if (integralSum < -integralSumLim)
+                integralSum=-integralSumLim;
+
+            if(reference!=lastReference)
+                integralSum=0;
+
+            if(gamepad2.x) pozB=BInchis;
+            if(gamepad2.a) pozB=BDeschis;
+
+            if(gamepad2.right_stick_y!=0)
+                pozB=(int)-gamepad2.right_stick_y*20;
 
 
-            Brat.setPower(pwrBrat);
-            Spinner.setPower(pwrSpinner);
+            //Extindor -- gamepad2
+            ExtindorDr.setTargetPosition(pozE);
+            ExtindorSt.setTargetPosition(pozE);
 
-            // ServoSt & ServoDr
-            if (gamepad2.x && timerX2.milliseconds()>300) {
-                if(x)
-                {
-                    pozSt = SusSt;
-                    pozDr = SusDr;
-                }
-                else
-                {
-                    pozSt=JosSt;
-                    pozDr=JosDr;
-                }
-                x= !x;
-                timerX2.reset();
-            }
-            if(gamepad2.left_stick_y!=0 && (pozSt>=JosSt||pozSt<=SusSt) && (pozDr<=JosDr||pozDr>=SusDr)) {
-                pozSt -= (double)gamepad2.left_stick_y/kx;
-                pozDr += (double)gamepad2.left_stick_y/kx;
-            }
-            if(pozSt<JosSt) pozSt=JosSt;
-            if(pozSt>SusSt)   pozSt=SusSt;
-            if(pozDr>JosDr) pozDr=JosDr;
-            if(pozDr<SusDr)   pozDr=SusDr;
+            if(gamepad2.b) pozE=EDeschis;
+            if(gamepad2.a) pozE=EInchis;
 
-            //Brat
-            if(gamepad1.y && timerY1.milliseconds()>300) {
-                if(y)
-                    pozBrat=SBrat;
-                else
-                    pozBrat=JBrat;
-                y= !y;
-                timerY1.reset();
-            }
-            if(gamepad1.right_trigger!=0 && pozBrat>=(JBrat-10) && pozBrat<=(SBrat+10)) {
-                pozBrat+=(int)gamepad1.right_trigger*ky;
-
-            }
-            if(gamepad1.left_trigger!=0 && pozBrat>=(JBrat-10) && pozBrat<=(SBrat+10)){
-                pozBrat-=(int)gamepad1.left_trigger*ky;
-            }
-            if(pozBrat<JBrat) pozBrat=JBrat;
-            if(pozBrat>SBrat) pozBrat=SBrat;
-            if(gamepad2.right_bumper)
-                pozBrat=200;
+            if (gamepad2.left_stick_y!=0 && pozE<=EDeschis && pozE>=EInchis)
+                pozE-=gamepad2.left_stick_y*kx;
+            if (pozE<EInchis)
+                pozE=EInchis;
+            if (pozE>EDeschis)
+                pozE=EDeschis;
 
 
-            //Intake
-            if(gamepad2.a)
-                pozIntake=IIntake;
-            if(gamepad2.b)
-                pozIntake=DIntake;
+            //Puteri
+            Brat.setPower((error*Kp) + (integralSum*Ki) + (derivative*Kd));
+            ExtindorSt.setPower(powerE);
+            ExtindorDr.setPower(powerE);
 
-            //Spinner
-            if(gamepad2.right_stick_x!=0 && pozSpinner>=(StartSpinner-10) && pozSpinner<=(FinishSpinner+10) && ServoSt.getPosition()>0.06)
+
+            //reset  - gamepad2
+            if (gamepad2.right_stick_button)
+                Brat.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            if(gamepad2.left_stick_button)
             {
-                //if(gamepad2.right_stick_x<0)
-                pozSpinner+=(int)gamepad2.right_stick_x*kS;
+                ExtindorDr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                ExtindorSt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
-            if(pozSpinner<StartSpinner)
-                pozSpinner=StartSpinner;
-            if(pozSpinner>FinishSpinner)
-                pozSpinner=FinishSpinner;
 
-            telemetry.addData("ServoSt: ", ServoSt.getPosition());
-            telemetry.addData("ServoDr: ", ServoDr.getPosition());
+            telemetry.addData("Pozitie robot X: ", poseEstimate.getX());
+            telemetry.addData("Pozitie robot Y: ", poseEstimate.getY());
+            telemetry.addData("Heading robot: ", poseEstimate.getHeading());
             telemetry.addData("Brat: ", Brat.getCurrentPosition());
-            if(Intake.getPosition()<0.1)
-                telemetry.addLine("Intake Deschis");
-            else telemetry.addLine("Intake Inchis");
-            telemetry.addData("Spinner: ", Spinner.getCurrentPosition());
+            telemetry.addData("Extindor: ", ExtindorDr.getCurrentPosition());
             telemetry.update();
         }
 
