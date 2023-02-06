@@ -31,6 +31,7 @@ public class DriverControl extends LinearOpMode {
     public static double Kp=0.007;
     public static double Ki=0.002;
     public static double Kd=0;
+    public static int kB=30;
 
     int reference=BInchis;
     int lastReference=reference;
@@ -55,19 +56,12 @@ public class DriverControl extends LinearOpMode {
         public static int EDeschis = 2700;
         int pozE = EInchis;
         public static double powerE = 1;
-        public static double kx = 20;
-
-
-
-
+        public static int kE = 20;
 
 
     DcMotorEx ExtindorDr;
     DcMotorEx ExtindorSt;
     DcMotorEx Brat;
-
-    ElapsedTime timerY1 = new ElapsedTime();
-    ElapsedTime timerX2 = new ElapsedTime();
 
     public void runOpMode() throws InterruptedException {
 
@@ -98,12 +92,12 @@ public class DriverControl extends LinearOpMode {
 
         while (opModeIsActive() && !isStopRequested()) {
 
-            // Viteze - gamepad1
+            // Viteze - gamepad1 ///////////////////////////////////////////////////////////////////
             if(gamepad1.dpad_left)  vit=3;
             if(gamepad1.dpad_down)  vit=2;
             if(gamepad1.dpad_right) vit=1;
 
-            // Condus  - gamepad1
+            // Condus  - gamepad1 //////////////////////////////////////////////////////////////////
             drive.setWeightedDrivePower(
                     new Pose2d(
                             gamepad1.left_stick_y/vit,
@@ -114,7 +108,7 @@ public class DriverControl extends LinearOpMode {
             drive.update();
             Pose2d poseEstimate = drive.getPoseEstimate();
 
-            //Brat   - gamepad2
+            //Brat   - gamepad2 ////////////////////////////////////////////////////////////////////
             lastReference=reference;
             reference=pozB;
 
@@ -141,11 +135,15 @@ public class DriverControl extends LinearOpMode {
             if(gamepad2.x) pozB=BInchis;
             if(gamepad2.y) pozB=BDeschis;
 
-            if(gamepad2.right_stick_y!=0)
-                pozB=(int)-gamepad2.right_stick_y*20;
+            if(gamepad2.right_stick_y!=0 && pozB<=BDeschis && pozB>=BInchis)
+                pozB-=(int)(-gamepad2.right_stick_y*kB);
+            if(pozB>BDeschis)
+                pozB=BDeschis;
+            if(pozB<BInchis)
+                pozB=BInchis;
 
 
-            //Extindor -- gamepad2
+            //Extindor -- gamepad2 /////////////////////////////////////////////////////////////////
             ExtindorDr.setTargetPosition(pozE);
             ExtindorSt.setTargetPosition(pozE);
 
@@ -153,20 +151,20 @@ public class DriverControl extends LinearOpMode {
             if(gamepad2.a) pozE=EInchis;
 
             if (gamepad2.left_stick_y!=0 && pozE<=EDeschis && pozE>=EInchis)
-                pozE-=gamepad2.left_stick_y*kx;
+                pozE-=gamepad2.left_stick_y*kE;
             if (pozE<EInchis)
                 pozE=EInchis;
             if (pozE>EDeschis)
                 pozE=EDeschis;
 
 
-            //Puteri
+            //Puteri ///////////////////////////////////////////////////////////////////////////////
             Brat.setPower((error*Kp) + (integralSum*Ki) + (derivative*Kd));
             ExtindorSt.setPower(powerE);
             ExtindorDr.setPower(powerE);
 
 
-            //reset  - gamepad2
+            //reset  - gamepad2/////////////////////////////////////////////////////////////////////
             if (gamepad2.right_stick_button)
                 Brat.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             if(gamepad2.left_stick_button)
@@ -174,7 +172,7 @@ public class DriverControl extends LinearOpMode {
                 ExtindorDr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 ExtindorSt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
-
+            //Telemetry ////////////////////////////////////////////////////////////////////////////
             telemetry.addData("Pozitie robot X: ", poseEstimate.getX());
             telemetry.addData("Pozitie robot Y: ", poseEstimate.getY());
             telemetry.addData("Heading robot: ", Math.toDegrees(poseEstimate.getHeading()));
