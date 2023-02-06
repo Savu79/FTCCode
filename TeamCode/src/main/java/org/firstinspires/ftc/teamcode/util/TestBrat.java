@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
-@TeleOp(name="Test Brat",group="Test")
+@TeleOp(name="Test Brat",group="test")
 public class TestBrat extends LinearOpMode {
     double power=0;
     DcMotorEx Brat;

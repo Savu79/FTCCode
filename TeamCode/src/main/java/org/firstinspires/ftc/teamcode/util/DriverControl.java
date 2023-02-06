@@ -107,7 +107,7 @@ public class DriverControl extends LinearOpMode {
             drive.setWeightedDrivePower(
                     new Pose2d(
                             gamepad1.left_stick_y/vit,
-                            gamepad1.right_stick_x/vit,
+                            -gamepad1.right_stick_x/vit,
                             -gamepad1.left_stick_x/vit
                     )
             );
@@ -139,7 +139,7 @@ public class DriverControl extends LinearOpMode {
                 integralSum=0;
 
             if(gamepad2.x) pozB=BInchis;
-            if(gamepad2.a) pozB=BDeschis;
+            if(gamepad2.y) pozB=BDeschis;
 
             if(gamepad2.right_stick_y!=0)
                 pozB=(int)-gamepad2.right_stick_y*20;
@@ -177,7 +177,7 @@ public class DriverControl extends LinearOpMode {
 
             telemetry.addData("Pozitie robot X: ", poseEstimate.getX());
             telemetry.addData("Pozitie robot Y: ", poseEstimate.getY());
-            telemetry.addData("Heading robot: ", poseEstimate.getHeading());
+            telemetry.addData("Heading robot: ", Math.toDegrees(poseEstimate.getHeading()));
             telemetry.addData("Brat: ", Brat.getCurrentPosition());
             telemetry.addData("Extindor: ", ExtindorDr.getCurrentPosition());
             telemetry.update();
