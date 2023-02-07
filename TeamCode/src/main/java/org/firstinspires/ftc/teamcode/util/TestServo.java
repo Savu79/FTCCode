@@ -11,7 +11,7 @@ public class TestServo extends LinearOpMode {
     public void runOpMode(){
         Servo Intake;
         int b=0;
-        Intake=hardwareMap.get(Servo.class, "IntakePahar");
+        Intake=hardwareMap.get(Servo.class, "servo");
         double poz=0;
         waitForStart();
         while(opModeIsActive()) {
