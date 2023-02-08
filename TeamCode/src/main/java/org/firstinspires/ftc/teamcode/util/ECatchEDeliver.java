@@ -33,6 +33,7 @@ public class ECatchEDeliver extends LinearOpMode {
     public ElapsedTime timerBrat= new ElapsedTime();
     public ElapsedTime timer = new ElapsedTime();
     public ElapsedTime timerCase2 = new ElapsedTime();
+    public ElapsedTime timerJos = new ElapsedTime();
 
     ////Intake
     public static double pozIntakeDeschis = 0.17;
@@ -97,7 +98,10 @@ public class ECatchEDeliver extends LinearOpMode {
     boolean autoSeg = false;
     boolean PaharSus=false;
     boolean DejaSus=false;
+    boolean PaharJos=false;
+    boolean deMaiMulte=false;
     int SWITCHSUS=1;
+    int SWITCHJOS=1;
 
     public void runOpMode (){
         waitForStart();
@@ -210,9 +214,15 @@ public class ECatchEDeliver extends LinearOpMode {
                 pozServoExtindor=1;
 
             ///autoSeg
-            if(gamepad2.start) PaharSus=true;
+            if(gamepad2.right_bumper) PaharSus=true;
             if (PaharSus && !DejaSus)
                 autoSegSus();
+            if(gamepad2.left_bumper) PaharJos=true;
+            if (PaharJos && DejaSus){
+                autoSegJos();
+            }
+
+
         }
     }
 
@@ -252,8 +262,26 @@ public class ECatchEDeliver extends LinearOpMode {
                 if(timerBrat.milliseconds()>500) {
                     pozBrat = pozBratSus;
                     DejaSus=true;
+                    PaharJos=false;
+                    SWITCHSUS=1;
                 }
                 break;
+        }
+    }
+
+    public void autoSegJos(){
+        pozBrat = pozBratJos;
+        if (!deMaiMulte)
+        {
+            timerJos.reset();
+            deMaiMulte=true;
+        }
+        if (timerJos.milliseconds() > 1000) {
+            directieMotorBratSus = false;
+            pozPuta=pozaPutaFara;
+            PaharSus = false;
+            DejaSus = false;
+            deMaiMulte=false;
         }
     }
 }
