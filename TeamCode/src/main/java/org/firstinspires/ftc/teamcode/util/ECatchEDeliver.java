@@ -61,19 +61,18 @@ public class ECatchEDeliver extends LinearOpMode {
 
     //Puta
     double pozPuta;
-    double pozPutaCu=0.14;
+    double pozPutaCu=0.20;
     double pozaPutaFara=0;
 
     //MotorBrat
     boolean directieMotorBratSus=false;
-    double Kcos=-0.41;
+    public static double Kcos=-0.41;
     double Ksin=-0.7;
 
     //Brat
     int pozBratSus = 2300;
     int pozBratJos = 0;
     int pozBrat=pozBratJos;
-    double powerB=0.7;
 
     public static double a=0;
 
@@ -118,37 +117,16 @@ public class ECatchEDeliver extends LinearOpMode {
 
         ExtindorSt.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         ExtindorDr.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        Brat.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Brat.setTargetPosition(pozBratJos);
+        Brat.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         ExtindorDr.setTargetPosition(EInchis);
         ExtindorSt.setTargetPosition(EInchis);
         ExtindorSt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         ExtindorDr.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-        Brat.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         ExtindorDr.setPower(powerE);
         ExtindorSt.setPower(powerE);
-        Brat.setPower(powerB);
-
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         while (opModeIsActive()) {
-
-            if(directieMotorBratSus)
-                MotorBrat.setPower( Math.sin(Math.toRadians(MotorBrat.getCurrentPosition()/(537.7/360))) * Ksin+0.1);
-            else
-                MotorBrat.setPower(Math.cos(Math.toRadians( MotorBrat.getCurrentPosition()/(357.7/360))) * Kcos-0.2);
-
-            ExtindorDr.setTargetPosition(pozE);
-            ExtindorSt.setTargetPosition(pozE);
-
-            ServoExtindor.setPosition(pozServoExtindor);
-
-            Intake.setPosition(pozIntake);
-
-            Puta.setPosition(pozPuta);
-
-            Brat.setPower((error*Kp) + (integralSum*Ki) + (derivative*Kd));
-
             lastReference=reference;
             reference=pozBrat;
 
@@ -172,10 +150,38 @@ public class ECatchEDeliver extends LinearOpMode {
             if(reference!=lastReference)
                 integralSum=0;
 
+            if(directieMotorBratSus)
+                MotorBrat.setPower(Math.sin(Math.toRadians(MotorBrat.getCurrentPosition()/(537.7/360))) * Ksin+0.1);
+            else
+                MotorBrat.setPower(Math.cos(Math.toRadians(MotorBrat.getCurrentPosition()/(357.7/360))) * Kcos-0.2);
+
+            ExtindorDr.setTargetPosition(pozE);
+            ExtindorSt.setTargetPosition(pozE);
+
+            ServoExtindor.setPosition(pozServoExtindor);
+
+            Intake.setPosition(pozIntake);
+
+            Puta.setPosition(pozPuta);
+
+            Brat.setPower((error*Kp) + (integralSum*Ki) + (derivative*Kd));
+
+            telemetry.addData("pozBrat ", pozBrat);
+            telemetry.addData("PozitieBrat ", Brat.getCurrentPosition());
+            telemetry.addData("PowerBrat ", Brat.getPower());
             telemetry.addData("PozitieIntake ", Intake.getPosition());
             telemetry.addData("PozitieServoExtindor", ServoExtindor.getPosition());
             telemetry.addData("PozitieExtindor", ExtindorDr.getCurrentPosition());
+            telemetry.addData("MotorBrat: ", MotorBrat.getCurrentPosition());
             telemetry.update();
+
+            if(gamepad1.a)
+                directieMotorBratSus=true;
+            if(gamepad1.b)
+                directieMotorBratSus=false;
+
+            if(gamepad1.right_stick_button)
+                MotorBrat.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             //////Mutare Extindor
             if (gamepad2.left_stick_y!=0 && pozE<=EDeschis && pozE>=EInchis)
@@ -206,49 +212,48 @@ public class ECatchEDeliver extends LinearOpMode {
             ///autoSeg
             if(gamepad2.start) PaharSus=true;
             if (PaharSus && !DejaSus)
-            {
-                switch (SWITCHSUS){
-                    case 1:
-                        pozIntake=pozIntakeInchis;
-                        pozServoExtindor=pozServoExtindorMij;
-                        pozE=EInchis;
-                        if(!ExtindorDr.isBusy() && !ExtindorSt.isBusy()) SWITCHSUS++;
-                        timerCase2.reset();
-                        break;
-
-                    case 2:
-                        pozServoExtindor=pozServoExtindorPas;
-                        if(timerCase2.milliseconds()>1000)//////////////
-                            pozIntake=pozIntakePasare;
-                        if(timerCase2.milliseconds()>1300)
-                        {
-                            pozE=EPas;
-                            if(!ExtindorDr.isBusy() && !ExtindorSt.isBusy())
-                            {
-                                pozPuta= pozPutaCu;
-                                pozIntake=pozIntakeInchis;
-                                SWITCHSUS++;
-                            }
-                        }
-                        break;
-
-                    case 3:
-                        pozE=EDeschis;
-                        pozServoExtindor=pozServoExtindor1;
-                        SWITCHSUS++;
-                        timerBrat.reset();
-                        break;
-                    case 4:
-                        directieMotorBratSus=true;
-                        if(timerBrat.milliseconds()>500) {
-                            pozBrat = pozBratSus;
-                            DejaSus=true;
-                        }
-            }
-            }
-
-
+                autoSegSus();
         }
     }
 
+    public void autoSegSus(){
+        switch (SWITCHSUS){
+            case 1:
+                pozIntake=pozIntakeInchis;
+                pozServoExtindor=pozServoExtindorMij;
+                pozE=EInchis;
+                if(!ExtindorDr.isBusy() && !ExtindorSt.isBusy()) SWITCHSUS++;
+                timerCase2.reset();
+                break;
+
+            case 2:
+                pozServoExtindor=pozServoExtindorPas;
+                if(timerCase2.milliseconds()>1000)
+                    pozIntake=pozIntakePasare;
+                if(timerCase2.milliseconds()>1300)
+                {
+                    pozE=EPas;
+                    if(!ExtindorDr.isBusy() && !ExtindorSt.isBusy())
+                    {
+                        pozPuta= pozPutaCu;
+                        pozIntake=pozIntakeInchis;
+                        SWITCHSUS++;
+                    }
+                }
+                break;
+            case 3:
+                pozE=EDeschis;
+                pozServoExtindor=pozServoExtindor1;
+                SWITCHSUS++;
+                timerBrat.reset();
+                break;
+            case 4:
+                directieMotorBratSus=true;
+                if(timerBrat.milliseconds()>500) {
+                    pozBrat = pozBratSus;
+                    DejaSus=true;
+                }
+                break;
+        }
+    }
 }
