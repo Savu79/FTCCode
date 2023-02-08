@@ -32,6 +32,7 @@ public class ECatchEDeliver extends LinearOpMode {
     ///timer
     public ElapsedTime timerBrat= new ElapsedTime();
     public ElapsedTime timer = new ElapsedTime();
+    public ElapsedTime timerCase2 = new ElapsedTime();
 
     ////Intake
     public static double pozIntakeDeschis = 0.17;
@@ -48,7 +49,7 @@ public class ECatchEDeliver extends LinearOpMode {
     public static double pozServoExtindor5 = 0.25;
     public static double pozServoExtindorPas = 0.63;
     public static double pozServoExtindorJos = 0;
-    public static double pozServoExtindor = pozServoExtindorJos;
+    public static double pozServoExtindor = pozServoExtindor1;
     public static double kx = 20;
 
     ///Extindor
@@ -64,9 +65,6 @@ public class ECatchEDeliver extends LinearOpMode {
     double pozaPutaFara=0;
 
     //MotorBrat
-    int pozMotorBrat=0;
-    int pozMotorBratJos=0;
-    int pozMotorBratSus=320;
     boolean directieMotorBratSus=false;
     double Kcos=-0.41;
     double Ksin=-0.7;
@@ -99,6 +97,7 @@ public class ECatchEDeliver extends LinearOpMode {
     ///Auto
     boolean autoSeg = false;
     boolean PaharSus=false;
+    boolean DejaSus=false;
     int SWITCHSUS=1;
 
     public void runOpMode (){
@@ -206,20 +205,20 @@ public class ECatchEDeliver extends LinearOpMode {
 
             ///autoSeg
             if(gamepad2.start) PaharSus=true;
-            if (PaharSus)
+            if (PaharSus && !DejaSus)
             {
-                ElapsedTime timerCase2 = new ElapsedTime();
                 switch (SWITCHSUS){
-                    case 1: {
+                    case 1:
                         pozIntake=pozIntakeInchis;
                         pozServoExtindor=pozServoExtindorMij;
                         pozE=EInchis;
                         if(!ExtindorDr.isBusy() && !ExtindorSt.isBusy()) SWITCHSUS++;
                         timerCase2.reset();
-                    }
-                    case 2: {
+                        break;
+
+                    case 2:
                         pozServoExtindor=pozServoExtindorPas;
-                        if(timerCase2.milliseconds()>1000)
+                        if(timerCase2.milliseconds()>1000)//////////////
                             pozIntake=pozIntakePasare;
                         if(timerCase2.milliseconds()>1300)
                         {
@@ -231,21 +230,20 @@ public class ECatchEDeliver extends LinearOpMode {
                                 SWITCHSUS++;
                             }
                         }
+                        break;
 
-                    }
-                    case 3: {
+                    case 3:
                         pozE=EDeschis;
                         pozServoExtindor=pozServoExtindor1;
                         SWITCHSUS++;
                         timerBrat.reset();
-                    }
-                    case 4: {
+                        break;
+                    case 4:
                         directieMotorBratSus=true;
                         if(timerBrat.milliseconds()>500) {
                             pozBrat = pozBratSus;
-                            break;
+                            DejaSus=true;
                         }
-                    }
             }
             }
 
