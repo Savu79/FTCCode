@@ -15,6 +15,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import dalvik.system.DelegateLastClassLoader;
+
 @Config
 @TeleOp(name="ECatchEDeliver", group= "test")
 public class ECatchEDeliver extends LinearOpMode {
@@ -28,8 +30,8 @@ public class ECatchEDeliver extends LinearOpMode {
     DcMotorEx MotorBrat;
 
     ///timer
-
-
+    public ElapsedTime timerBrat= new ElapsedTime();
+    public ElapsedTime timer = new ElapsedTime();
 
     ////Intake
     public static double pozIntakeDeschis = 0.17;
@@ -62,9 +64,12 @@ public class ECatchEDeliver extends LinearOpMode {
     double pozaPutaFara=0;
 
     //MotorBrat
+    int pozMotorBrat=0;
     int pozMotorBratJos=0;
     int pozMotorBratSus=320;
-    double powerBM=1;
+    boolean directieMotorBratSus=false;
+    double Kcos=-0.41;
+    double Ksin=-0.7;
 
     //Brat
     int pozBratSus = 2300;
@@ -72,10 +77,29 @@ public class ECatchEDeliver extends LinearOpMode {
     int pozBrat=pozBratJos;
     double powerB=0.7;
 
+    public static double a=0;
+
+    public static double Kp=0.01;
+    public static double Ki=0.01;
+    public static double Kd=0.0005;
+
+    int reference=pozBratJos;
+    int lastReference=reference;
+
+    int error;
+    int lastError;
+
+    double integralSum=0;
+    public static double integralSumLim=0;
+
+    double derivative;
+    float currentFilterEstimate;
+    float previousFilterEstimate;
+
     ///Auto
     boolean autoSeg = false;
     boolean PaharSus=false;
-    int a=1;
+    int SWITCHSUS=1;
 
     public void runOpMode (){
         waitForStart();
@@ -110,11 +134,45 @@ public class ECatchEDeliver extends LinearOpMode {
 
         while (opModeIsActive()) {
 
+            if(directieMotorBratSus)
+                MotorBrat.setPower( Math.sin(Math.toRadians(MotorBrat.getCurrentPosition()/(537.7/360))) * Ksin+0.1);
+            else
+                MotorBrat.setPower(Math.cos(Math.toRadians( MotorBrat.getCurrentPosition()/(357.7/360))) * Kcos-0.2);
+
             ExtindorDr.setTargetPosition(pozE);
             ExtindorSt.setTargetPosition(pozE);
+
             ServoExtindor.setPosition(pozServoExtindor);
+
             Intake.setPosition(pozIntake);
+
             Puta.setPosition(pozPuta);
+
+            Brat.setPower((error*Kp) + (integralSum*Ki) + (derivative*Kd));
+
+            lastReference=reference;
+            reference=pozBrat;
+
+            error=pozBrat-Brat.getCurrentPosition();
+
+            currentFilterEstimate=(float)a*previousFilterEstimate + (1-(float)a*(error-lastError));
+
+            integralSum+=error*timer.seconds();
+
+            derivative=currentFilterEstimate/timer.seconds();
+
+            previousFilterEstimate=currentFilterEstimate;
+
+            timer.reset();
+
+            if (integralSum > integralSumLim)
+                integralSum=integralSumLim;
+            if (integralSum < -integralSumLim)
+                integralSum=-integralSumLim;
+
+            if(reference!=lastReference)
+                integralSum=0;
+
             telemetry.addData("PozitieIntake ", Intake.getPosition());
             telemetry.addData("PozitieServoExtindor", ServoExtindor.getPosition());
             telemetry.addData("PozitieExtindor", ExtindorDr.getCurrentPosition());
@@ -151,41 +209,42 @@ public class ECatchEDeliver extends LinearOpMode {
             if (PaharSus)
             {
                 ElapsedTime timerCase2 = new ElapsedTime();
-                switch (a){
+                switch (SWITCHSUS){
                     case 1: {
-                        Intake.setPosition(pozIntakeInchis);
-                        ServoExtindor.setPosition(pozServoExtindorMij);
-                        ExtindorDr.setTargetPosition(EInchis);
-                        ExtindorSt.setTargetPosition(EInchis);
-                        if(!ExtindorDr.isBusy() && !ExtindorSt.isBusy()) a=2;
+                        pozIntake=pozIntakeInchis;
+                        pozServoExtindor=pozServoExtindorMij;
+                        pozE=EInchis;
+                        if(!ExtindorDr.isBusy() && !ExtindorSt.isBusy()) SWITCHSUS++;
                         timerCase2.reset();
                     }
                     case 2: {
-                        ServoExtindor.setPosition(pozServoExtindorPas);
+                        pozServoExtindor=pozServoExtindorPas;
                         if(timerCase2.milliseconds()>1000)
-                            Intake.setPosition(pozIntakePasare);
+                            pozIntake=pozIntakePasare;
                         if(timerCase2.milliseconds()>1300)
                         {
-                            ExtindorSt.setTargetPosition(EPas);
-                            ExtindorDr.setTargetPosition(EPas);
+                            pozE=EPas;
                             if(!ExtindorDr.isBusy() && !ExtindorSt.isBusy())
                             {
-                                Puta.setPosition(pozPutaCu);
-                                Intake.setPosition(pozIntakeInchis);
-                                a=3;
-
+                                pozPuta= pozPutaCu;
+                                pozIntake=pozIntakeInchis;
+                                SWITCHSUS++;
                             }
                         }
 
                     }
                     case 3: {
-                        ExtindorSt.setTargetPosition(EDeschis);
-                        ExtindorDr.setTargetPosition(EDeschis);
-                        ServoExtindor.setPosition(pozServoExtindor1);
-                        a=4;
+                        pozE=EDeschis;
+                        pozServoExtindor=pozServoExtindor1;
+                        SWITCHSUS++;
+                        timerBrat.reset();
                     }
                     case 4: {
-                        MotorBrat.setPower( Math.sin(Math.toRadians(MotorBrat.getCurrentPosition()/(537.7/360))) * Ksin+0.1);
+                        directieMotorBratSus=true;
+                        if(timerBrat.milliseconds()>500) {
+                            pozBrat = pozBratSus;
+                            break;
+                        }
                     }
             }
             }
