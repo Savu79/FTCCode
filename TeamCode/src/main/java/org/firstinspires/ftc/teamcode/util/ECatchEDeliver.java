@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import static org.firstinspires.ftc.teamcode.util.TestMotorEncoder.Ksin;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -9,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -24,9 +27,8 @@ public class ECatchEDeliver extends LinearOpMode {
     DcMotorEx Brat;
     DcMotorEx MotorBrat;
 
-    ///Sleepy time
-    public static int SleepExtindor = 1000;
-    public static int SleepServoExtindor = 1000;
+    ///timer
+
 
 
     ////Intake
@@ -73,6 +75,7 @@ public class ECatchEDeliver extends LinearOpMode {
     ///Auto
     boolean autoSeg = false;
     boolean PaharSus=false;
+    int a=1;
 
     public void runOpMode (){
         waitForStart();
@@ -144,60 +147,51 @@ public class ECatchEDeliver extends LinearOpMode {
                 pozServoExtindor=1;
 
             ///autoSeg
-            if (gamepad2.start && !PaharSus)
-                autoSegPanaSus();
+            if(gamepad2.start) PaharSus=true;
+            if (PaharSus)
+            {
+                ElapsedTime timerCase2 = new ElapsedTime();
+                switch (a){
+                    case 1: {
+                        Intake.setPosition(pozIntakeInchis);
+                        ServoExtindor.setPosition(pozServoExtindorMij);
+                        ExtindorDr.setTargetPosition(EInchis);
+                        ExtindorSt.setTargetPosition(EInchis);
+                        if(!ExtindorDr.isBusy() && !ExtindorSt.isBusy()) a=2;
+                        timerCase2.reset();
+                    }
+                    case 2: {
+                        ServoExtindor.setPosition(pozServoExtindorPas);
+                        if(timerCase2.milliseconds()>1000)
+                            Intake.setPosition(pozIntakePasare);
+                        if(timerCase2.milliseconds()>1300)
+                        {
+                            ExtindorSt.setTargetPosition(EPas);
+                            ExtindorDr.setTargetPosition(EPas);
+                            if(!ExtindorDr.isBusy() && !ExtindorSt.isBusy())
+                            {
+                                Puta.setPosition(pozPutaCu);
+                                Intake.setPosition(pozIntakeInchis);
+                                a=3;
+
+                            }
+                        }
+
+                    }
+                    case 3: {
+                        ExtindorSt.setTargetPosition(EDeschis);
+                        ExtindorDr.setTargetPosition(EDeschis);
+                        ServoExtindor.setPosition(pozServoExtindor1);
+                        a=4;
+                    }
+                    case 4: {
+                        MotorBrat.setPower( Math.sin(Math.toRadians(MotorBrat.getCurrentPosition()/(537.7/360))) * Ksin+0.1);
+                    }
+            }
+            }
+
 
         }
     }
-    ///functii auto
-    public void autoSegPanaSus()
-    {
-        Intake.setPosition(pozIntakeInchis);
 
-        ServoExtindor.setPosition(pozServoExtindorMij);
-
-        ExtindorDr.setTargetPosition(EInchis);
-        ExtindorSt.setTargetPosition(EInchis);
-        while(ExtindorDr.isBusy() || ExtindorSt.isBusy())
-            sleep (10);
-
-        ServoExtindor.setPosition(pozServoExtindorPas);
-        Intake.setPosition(pozIntakePasare);
-        sleep(300);
-
-        ExtindorSt.setTargetPosition(EPas);
-        ExtindorDr.setTargetPosition(EPas);
-        while(ExtindorDr.isBusy() || ExtindorSt.isBusy())
-            sleep(10);
-
-        Intake.setPosition(pozIntakeInchis);
-        Puta.setPosition(pozPutaCu);
-
-        Brat.setTargetPosition(pozBratSus);
-
-        ExtindorSt.setTargetPosition(EDeschis);
-        ExtindorDr.setTargetPosition(EDeschis);
-
-        ServoExtindor.setPosition(pozServoExtindor1);
-
-        sleep(300);
-
-        MotorBrat.setTargetPosition(pozMotorBratSus);
-
-
-
-
-        pozBrat=pozBratSus;
-        pozE=EDeschis;
-        pozIntake=pozIntakeInchis;
-        pozServoExtindor=pozServoExtindor1;
-        pozPuta=pozPutaCu;
-        PaharSus=true;
-    }
-    /*public void autoSegPanaJos()
-    {
-
-        PaharSus=false
-    }*/
-/
 }
