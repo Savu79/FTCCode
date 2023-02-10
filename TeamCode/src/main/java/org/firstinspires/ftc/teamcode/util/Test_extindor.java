@@ -13,8 +13,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @TeleOp(name="Test Extindor", group= "test")
 public class Test_extindor extends LinearOpMode {
 
-    public static int EInchis=0;
-    public static int EDeschis=3550;
     double power=0;
     double powerDr=0;
     double powerSt=0;

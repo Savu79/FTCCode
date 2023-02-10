@@ -20,7 +20,7 @@ public class TestMotorEncoder extends LinearOpMode {
     boolean SIN=true;
     public void runOpMode(){
 
-        motor=hardwareMap.get(DcMotorEx.class, "motor");
+        motor=hardwareMap.get(DcMotorEx.class, "MotorBrat");
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         waitForStart();
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
