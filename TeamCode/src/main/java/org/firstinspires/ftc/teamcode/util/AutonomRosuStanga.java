@@ -1,13 +1,12 @@
 package org.firstinspires.ftc.teamcode.util;
 
-
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -16,11 +15,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
+@Autonomous(name="AutonomRosuStanga")
 @Config
-@TeleOp (name= "Driver Control", group = "drive")
-public class DriverControl extends LinearOpMode {
-
+public class AutonomRosuStanga extends LinearOpMode {
 
     Servo Intake;
     Servo ServoExtindor;
@@ -33,28 +32,28 @@ public class DriverControl extends LinearOpMode {
     //viteza
     double vit=1;
 
-    ///timer
+    boolean schimb;
+
+    //valori timere
+    static int zero=1000;
+    static int unu=1000;
+    static int doi=1400;
+    static int trei=1700;
+    static int patru=500;
+    static int cinci=900;
+    static int sase=1500;
+
+    //timer
     ElapsedTime timerBrat= new ElapsedTime();
     ElapsedTime timerCase1 = new ElapsedTime();
     ElapsedTime timerCase2 = new ElapsedTime();
     ElapsedTime timerCase3= new ElapsedTime();
-    ElapsedTime timerCase4= new ElapsedTime();
     ElapsedTime timerY = new ElapsedTime();
     ElapsedTime timerJos = new ElapsedTime();
 
-    //valori timere
-    public static int zero=1000;
-    public static int unu=1000;
-    public static int doi=1400;
-    public static int trei=1700;
-    public static int patru=500;
-    public static int cinci=900;
-    public static int sase=1500;
-    public static int cleste=400;
-
     ////Intake
-    static double pozIntakeDeschis = 0.17;
-    static double pozIntakeInchis = 0;
+    double pozIntakeDeschis = 0.17;
+    double pozIntakeInchis = 0;
     public static double pozIntakePasare = 0.1;
     double pozIntake;
 
@@ -67,8 +66,7 @@ public class DriverControl extends LinearOpMode {
     static double pozServoExtindor5 = 0.25;
     public static double pozServoExtindorPas = 0.67;
     static double pozServoExtindorJos = 0;
-    static double pozServoExtindor = pozServoExtindor1;
-
+    static double pozServoExtindor = pozServoExtindor5;
 
     ///Extindor
     static double powerE = 1;
@@ -98,25 +96,6 @@ public class DriverControl extends LinearOpMode {
     int pozBrat=pozBratJos;
     public static double powerB=0.6;
 
-    /*static double a=0;
-
-    static double Kp=0.01;
-    static double Ki=0.01;
-    static double Kd=0.0005;
-
-    int reference=pozBratJos;
-    int lastReference=reference;
-
-    int error;
-    int lastError;
-
-    double integralSum=0;
-    public static double integralSumLim=0;
-
-    double derivative;
-    float currentFilterEstimate;
-    float previousFilterEstimate;*/
-
     ///Auto
     boolean PaharSus=false;
     boolean DejaSus=false;
@@ -124,11 +103,8 @@ public class DriverControl extends LinearOpMode {
     boolean deMaiMulte=false;
     int SWITCHSUS=1;
 
-    @Override
-    public void runOpMode() throws InterruptedException{
-
-        SampleMecanumDrive drive= new SampleMecanumDrive(hardwareMap);
-
+    public void runOpMode(){
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         Intake       =hardwareMap.get(Servo.class, "Intake");
         ServoExtindor=hardwareMap.get(Servo.class, "ServoExtindor");
         ExtindorDr   =hardwareMap.get(DcMotorEx.class, "ExtindorDr");
@@ -159,162 +135,33 @@ public class DriverControl extends LinearOpMode {
 
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
+        Trajectory traj1 = drive.trajectoryBuilder(new Pose2d(-103/2.54, -165.5/2.54, Math.toRadians(90)))
+                .forward(120/2.54)
+                .build();
+
         while(opModeIsActive()){
-
-            //viteze
-            if(gamepad1.dpad_left) vit=3;
-            if(gamepad1.dpad_up) vit=2;
-            if(gamepad1.dpad_right) vit=1;
-
-            //condus
-            drive.setWeightedDrivePower(
-                    new Pose2d(
-                            -gamepad1.left_stick_y/vit,
-                            -gamepad1.right_stick_x/vit,
-                            -gamepad1.left_stick_x/vit
-                    )
-            );
-            drive.update();
-            Pose2d poseEstimate=drive.getPoseEstimate();
-
-
-            //power-pozitii
-
-            ExtindorDr.setTargetPosition(pozE);
-            ExtindorSt.setTargetPosition(pozE);
-
-            Brat.setTargetPosition(pozBrat);
-
-            ServoExtindor.setPosition(pozServoExtindor);
-
-            Intake.setPosition(pozIntake);
-
-            Puta.setPosition(pozPuta);
-
-            MotorBrat.setPower(COSSIN(directieMotorBratSus));
-
-            //Mutare Extindor -GP1
-            if (gamepad1.right_trigger!=0 && pozE<=EDeschis)
-                pozE+=gamepad1.right_trigger*kx;
-            if(gamepad1.left_trigger!=0 && pozE>=EInchis)
-                pozE-=gamepad1.left_trigger*kx;
-            if (pozE<EInchis)
-                pozE=EInchis;
-            if (pozE>EDeschis)
-                pozE=EDeschis;
-
-            //Mutare ServoExtindor -GP2
-            if (gamepad2.right_stick_y != 0 && pozServoExtindor >= 0 && pozServoExtindor <= 1)
-                pozServoExtindor -= gamepad2.right_stick_y / 80;
-            if(pozServoExtindor<0)
-                pozServoExtindor=0;
-            if(pozServoExtindor>pozServoExtindorMij)
-                pozServoExtindor=pozServoExtindorMij;
-
-            //Mutare Brat -GP2
-            if (gamepad2.right_trigger!=0 && pozBrat<=pozBratSus){
-                pozBrat+=gamepad2.right_trigger*80;
-            }
-
-            if (gamepad2.left_trigger!=0 && pozBrat>=pozBratJos)
+            drive.followTrajectory(traj1);
+            if(timerJos.seconds()>1 && schimb)
             {
-                pozBrat-=gamepad2.left_trigger*80;
-            }
-
-
-            if(pozBrat<pozBratJos)
-                pozBrat=pozBratJos;
-            if(pozBrat>pozBratSus)
-                pozBrat=pozBratSus;
-
-            //Mutare MotorBrat -GP2
-            if(gamepad2.y && timerY.milliseconds()>300)
+                Intake.setPosition(pozIntakeDeschis);
+                schimb=!schimb;
+                timerJos.reset();
+            } else if (timerJos.seconds()>1 && !schimb)
             {
-                if(GPy){
-                    directieMotorBratSus=true;
-                }
-
-                else {
-                    directieMotorBratSus=false;
-                }
-                GPy=!GPy;
-                timerY.reset();
+                Intake.setPosition(pozIntakeInchis);
+                schimb=!schimb;
+                timerJos.reset();
             }
-
-            //Mutare Intake -GP2
-            if(gamepad2.a)
-                pozIntake= pozIntakeDeschis;
-            if(gamepad2.b)
-                pozIntake=pozIntakeInchis;
-
-            //Mutare Puta -GP1
-            if(gamepad1.b)
-                pozPuta=pozaPutaFara;
-            if(gamepad1.a)
-                pozPuta=pozaPutaFara;
-
-            //auto Pahar Sus
-            if(gamepad2.right_bumper) {
-                timerCase1.reset();
-                PaharSus=true;
-            }
-            if (PaharSus && !DejaSus)
-                autoSegSus();
-
-
-            //auto Pahar Jos
-            if(gamepad2.left_bumper) PaharJos=true;
-            if (PaharJos && DejaSus)
-                autoSegJos();
-
-
-            telemetry.addData("Pozitie robot X: ", toCm(poseEstimate.getX()));
-            telemetry.addData("Pozitie robot Y: ", toCm(poseEstimate.getY()));
-            telemetry.addData("Heading robot: ", Math.toDegrees(poseEstimate.getHeading()));
-            telemetry.addData("Brat: ", Brat.getCurrentPosition());
-            telemetry.addData("Putere Brat: ", Brat.getPower());
-            telemetry.addData("Extindor: ", ExtindorDr.getCurrentPosition());
-            telemetry.addData("Pozitie MotorBrat", MotorBrat.getCurrentPosition());
-            telemetry.addData("Power MotorBrat ", MotorBrat.getCurrentPosition());
-            telemetry.addData("EBlocat: ", EBlocat);
-            telemetry.update();
         }
     }
-
-    /*double PIDControlBrat(int pozBrat)
-    {
-        lastReference=reference;
-        reference=pozBrat;
-
-        error=pozBrat-Brat.getCurrentPosition();
-
-        currentFilterEstimate=(float)a*previousFilterEstimate + (1-(float)a*(error-lastError));
-
-        integralSum+=error*timer.seconds();
-
-        derivative=currentFilterEstimate/timer.seconds();
-
-        previousFilterEstimate=currentFilterEstimate;
-
-        timer.reset();
-
-        if (integralSum > integralSumLim)
-            integralSum=integralSumLim;
-        if (integralSum < -integralSumLim)
-            integralSum=-integralSumLim;
-
-        if(reference!=lastReference)
-            integralSum=0;
-        return ((error*Kp) + (integralSum*Ki) + (derivative*Kd));
-    }*/
-    double COSSIN(boolean directieMotorBratSus)
+    public double COSSIN(boolean directieMotorBratSus)
     {
         if(directieMotorBratSus)
             return(Math.sin(Math.toRadians(MotorBrat.getCurrentPosition()/(537.7/360))) * Ksin+PowerSin);
         else
             return(Math.cos(Math.toRadians(MotorBrat.getCurrentPosition()/(357.7/360))) * Kcos-PowerCos);
     }
-    void autoSegSus(){
+    public void autoSegSus(){
         switch (SWITCHSUS){
             case 1:
                 EBlocat=ExtindorDr.getCurrentPosition();
@@ -355,18 +202,13 @@ public class DriverControl extends LinearOpMode {
                 {
                     pozIntake=pozIntakeInchis;
                     SWITCHSUS++;
-                    timerCase4.reset();
                     break;
                 }
             case 4:
                 pozE=EBlocat;
                 pozServoExtindor=pozServoExtindor1;
-                if(timerCase4.milliseconds()>cleste){
-                    Intake.setPosition(pozIntakeDeschis);
-                    SWITCHSUS++;
-                    timerBrat.reset();
-                }
-
+                SWITCHSUS++;
+                timerBrat.reset();
                 break;
             case 5:
                 directieMotorBratSus=true;
@@ -397,5 +239,5 @@ public class DriverControl extends LinearOpMode {
     public double toCm(double value){
         return value*2.54;
     }
+    public double toInch(double value) { return value/2.54; }
 }
-//<3<3<3<3<3<3<3<3<3<3<3<3<3<3muie<3<3<3<3<3<3<3<3<3<3<3<3<3<3<3<3<3<3<3<3<3<3
