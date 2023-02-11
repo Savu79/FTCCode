@@ -33,12 +33,12 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
     public static double magnif=1;
     public static double height=16.0;
     public static double width=9.0;
-    private static final String TFOD_MODEL_ASSET = "Ayan-Echipa-Robot.tflite";
+    private static final String TFOD_MODEL_ASSET = "ModelCM.tflite";
 
     private static final String[] LABELS = {
-      "1 Ayan",
-      "2 Echipa",
-      "3 Robot"
+      "1 Luna",
+      "2 Soare",
+      "3 Stele"
     };
 
     private static final String VUFORIA_KEY =

@@ -66,7 +66,7 @@ public class AutonomRosuStanga extends LinearOpMode {
     static double pozServoExtindor5 = 0.25;
     public static double pozServoExtindorPas = 0.67;
     static double pozServoExtindorJos = 0;
-    static double pozServoExtindor = pozServoExtindor5;
+    static double pozServoExtindor = pozServoExtindor1;
 
     ///Extindor
     static double powerE = 1;
@@ -88,7 +88,6 @@ public class AutonomRosuStanga extends LinearOpMode {
     public static double PowerSin=0.1;
     public static double PowerCos=0.2;
     public static double Ksin=-0.7;
-    boolean GPy=true;
 
     //Brat
     int pozBratSus = 2200;
@@ -103,8 +102,11 @@ public class AutonomRosuStanga extends LinearOpMode {
     boolean deMaiMulte=false;
     int SWITCHSUS=1;
 
+    public static double valoare;
+
     public void runOpMode(){
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+
         Intake       =hardwareMap.get(Servo.class, "Intake");
         ServoExtindor=hardwareMap.get(Servo.class, "ServoExtindor");
         ExtindorDr   =hardwareMap.get(DcMotorEx.class, "ExtindorDr");
@@ -112,7 +114,6 @@ public class AutonomRosuStanga extends LinearOpMode {
         Puta         =hardwareMap.get(Servo.class, "Puta");
         Brat         =hardwareMap.get(DcMotorEx.class, "Brat");
         MotorBrat    =hardwareMap.get(DcMotorEx.class, "MotorBrat");
-
 
         Brat.setDirection(DcMotorSimple.Direction.REVERSE);
         ExtindorSt.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -136,11 +137,16 @@ public class AutonomRosuStanga extends LinearOpMode {
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         Trajectory traj1 = drive.trajectoryBuilder(new Pose2d(-103/2.54, -165.5/2.54, Math.toRadians(90)))
-                .forward(120/2.54)
+                .forward(valoare/2.54)
                 .build();
 
+        ServoExtindor.setPosition(pozServoExtindor5);
+
+        drive.setPoseEstimate(new Pose2d(-103/2.54, -165.5/2.54, Math.toRadians(90)));
+        drive.followTrajectory(traj1);
+
         while(opModeIsActive()){
-            drive.followTrajectory(traj1);
+
             if(timerJos.seconds()>1 && schimb)
             {
                 Intake.setPosition(pozIntakeDeschis);

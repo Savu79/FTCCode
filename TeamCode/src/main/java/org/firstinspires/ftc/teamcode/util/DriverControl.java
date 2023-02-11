@@ -81,8 +81,8 @@ public class DriverControl extends LinearOpMode {
 
     //Puta
     double pozPutaCu=0.87;
-    double pozaPutaFara=1;
-    double pozPuta=pozaPutaFara;
+    double pozPutaFara=1;
+    double pozPuta=pozPutaFara;
 
     //MotorBrat
     boolean directieMotorBratSus=false;
@@ -249,9 +249,9 @@ public class DriverControl extends LinearOpMode {
 
             //Mutare Puta -GP1
             if(gamepad1.b)
-                pozPuta=pozaPutaFara;
+                pozPuta=pozPutaFara;
             if(gamepad1.a)
-                pozPuta=pozaPutaFara;
+                pozPuta=pozPutaCu;
 
             //auto Pahar Sus
             if(gamepad2.right_bumper) {
@@ -318,7 +318,7 @@ public class DriverControl extends LinearOpMode {
         switch (SWITCHSUS){
             case 1:
                 EBlocat=ExtindorDr.getCurrentPosition();
-                pozPuta=pozaPutaFara;
+                pozPuta=pozPutaFara;
                 pozIntake=pozIntakeInchis;
                 pozServoExtindor=pozServoExtindorMij;
                 if(timerCase1.milliseconds()>zero)
@@ -388,7 +388,7 @@ public class DriverControl extends LinearOpMode {
         }
         if (timerJos.milliseconds() > sase) {
             directieMotorBratSus = false;
-            pozPuta=pozaPutaFara;
+            pozPuta=pozPutaFara;
             PaharSus = false;
             DejaSus = false;
             deMaiMulte=false;
