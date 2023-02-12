@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import static org.firstinspires.ftc.teamcode.util.PowerPlayDeterminationExample.parcare;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -16,6 +19,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
 
 @Autonomous(name="AutonomRosuStanga")
 @Config
@@ -50,6 +57,7 @@ public class AutonomRosuStanga extends LinearOpMode {
     ElapsedTime timerCase3= new ElapsedTime();
     ElapsedTime timerY = new ElapsedTime();
     ElapsedTime timerJos = new ElapsedTime();
+    ElapsedTime timerMotorBrat = new ElapsedTime();
 
     ////Intake
     double pozIntakeDeschis = 0.17;
@@ -102,9 +110,46 @@ public class AutonomRosuStanga extends LinearOpMode {
     boolean deMaiMulte=false;
     int SWITCHSUS=1;
 
-    public static double valoare;
+    public static int pozToScoringStrafe=10;
+    public static int pozToScoringBack=35;
+    public static double pozToScoringHeading=130;
+
+    Pose2d RRpozStart= new Pose2d(0, 0, 0);
+
+    public static double valoare=140;
+
+    boolean iesire=true;
+
+
+
+
+    private PowerPlayDeterminationExample sleeveDetection;
+    private OpenCvCamera phoneCam;
 
     public void runOpMode(){
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+        sleeveDetection = new PowerPlayDeterminationExample();
+        phoneCam.setPipeline(sleeveDetection);
+        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+
+        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                phoneCam.startStreaming(320,240, OpenCvCameraRotation.UPSIDE_DOWN);
+            }
+
+            @Override
+            public void onError(int errorCode) {}
+        });
+
+        while (!isStarted()) {
+            telemetry.addData("Pozitie", parcare);
+            telemetry.update();
+            sleep(200);
+        }
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         Intake       =hardwareMap.get(Servo.class, "Intake");
@@ -131,34 +176,85 @@ public class AutonomRosuStanga extends LinearOpMode {
         ExtindorDr.setPower(powerE);
         ExtindorSt.setPower(powerE);
 
+        Puta.setPosition(pozPutaCu);
+
+
+
+
         waitForStart();
 
 
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        Trajectory traj1 = drive.trajectoryBuilder(new Pose2d(-103/2.54, -165.5/2.54, Math.toRadians(90)))
+        TrajectorySequence traj1 = drive.trajectorySequenceBuilder(RRpozStart)
+                .addTemporalMarker(0.5, () -> {
+                    Intake.setPosition(pozIntakeDeschis);
+                })
+                .waitSeconds(0.5)
                 .forward(valoare/2.54)
                 .build();
 
-        ServoExtindor.setPosition(pozServoExtindor5);
+        /*TrajectorySequence traj2 = drive.trajectorySequenceBuilder(new Pose2d(0,0,0))
+                .addTemporalMarker(0.6, () -> {
+                    Intake.setPosition(pozIntakeInchis);
+                    ServoExtindor.setPosition(pozServoExtindorMij);
+                })
+                .lineTo(new Vector2d(toInch(pozToScoringX), toInch(pozToScoringY)))
+                .turn(Math.toRadians(pozToScoringHeading))
+                .build();*/
 
-        drive.setPoseEstimate(new Pose2d(-103/2.54, -165.5/2.54, Math.toRadians(90)));
-        drive.followTrajectory(traj1);
+        TrajectorySequence traj2 = drive.trajectorySequenceBuilder(new Pose2d(0,0,0))
+                .addTemporalMarker(0.6, () -> {
+                    Intake.setPosition(pozIntakeInchis);
+                    ServoExtindor.setPosition(pozServoExtindorMij);
+                })
+                .back(toInch(pozToScoringBack))
+                .build();
 
-        while(opModeIsActive()){
+        TrajectorySequence traj3 = drive.trajectorySequenceBuilder(new Pose2d(0,0,0))
+                .addTemporalMarker(0.3, () -> {
+                            ServoExtindor.setPosition(pozServoExtindor3);
+                })
+                .strafeLeft(toInch(pozToScoringStrafe))
+                .turn(Math.toRadians(pozToScoringHeading))
+                .build();
 
-            if(timerJos.seconds()>1 && schimb)
-            {
-                Intake.setPosition(pozIntakeDeschis);
-                schimb=!schimb;
-                timerJos.reset();
-            } else if (timerJos.seconds()>1 && !schimb)
-            {
-                Intake.setPosition(pozIntakeInchis);
-                schimb=!schimb;
-                timerJos.reset();
-            }
+
+        ServoExtindor.setPosition(0);
+
+        drive.setPoseEstimate(RRpozStart);
+        drive.followTrajectorySequence(traj1);
+        drive.setPoseEstimate(new Pose2d(0,0,0));
+        drive.followTrajectorySequence(traj2);
+        drive.followTrajectorySequence(traj3);
+
+        timerBrat.reset();
+
+        while(timerBrat.seconds()<4)
+        {
+            MotorBrat.setPower(COSSIN(directieMotorBratSus));
+            directieMotorBratSus=true;
+            Brat.setTargetPosition(pozBratSus);
         }
+
+        Puta.setPosition(pozaPutaFara);
+
+        timerBrat.reset();
+
+        while(timerBrat.seconds()<4)
+            Brat.setTargetPosition(pozBratJos);
+
+        timerMotorBrat.reset();
+        directieMotorBratSus=false;
+
+        while(timerMotorBrat.milliseconds()<2000)
+            MotorBrat.setPower(COSSIN(directieMotorBratSus));
+
+        MotorBrat.setPower(0);
+
+        ServoExtindor.setPosition(pozServoExtindorMij);
+
+
     }
     public double COSSIN(boolean directieMotorBratSus)
     {

@@ -1,8 +1,13 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import static org.firstinspires.ftc.teamcode.util.PowerPlayDeterminationExample.parcare;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.util.PowerPlayDeterminationExample;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -16,9 +21,10 @@ public class TestDetection extends LinearOpMode {
     private PowerPlayDeterminationExample sleeveDetection;
     private OpenCvCamera phoneCam;
 
-    // Name of the Webcam to be set in the config
 
     public void runOpMode() throws InterruptedException {
+        Telemetry telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry());
+
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         sleeveDetection = new PowerPlayDeterminationExample();
@@ -34,7 +40,7 @@ public class TestDetection extends LinearOpMode {
             @Override
             public void onOpened()
             {
-                phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_LEFT);
+                phoneCam.startStreaming(320,240, OpenCvCameraRotation.UPSIDE_DOWN);
             }
 
             @Override
@@ -44,8 +50,12 @@ public class TestDetection extends LinearOpMode {
         while (!isStarted()) {
             telemetry.addData("ROTATION: ", sleeveDetection.getPosition());
             telemetry.update();
+            sleep(200);
         }
 
         waitForStart();
+
+        telemetry.addData("Parcare la: ", parcare);
+        telemetry.update();
     }
 }

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.opencv.core.Core;
@@ -11,7 +12,7 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
-
+@Config
 public class PowerPlayDeterminationExample extends OpenCvPipeline {
     /*
     YELLOW  = Parking Left
@@ -26,7 +27,7 @@ public class PowerPlayDeterminationExample extends OpenCvPipeline {
     }
 
     // TOPLEFT anchor point for the bounding box
-    private static Point SLEEVE_TOPLEFT_ANCHOR_POINT = new Point(145, 168);
+    private static Point SLEEVE_TOPLEFT_ANCHOR_POINT = new Point(45, 168);
 
     // Width and height for the bounding box
     public static int REGION_WIDTH = 30;
@@ -48,6 +49,7 @@ public class PowerPlayDeterminationExample extends OpenCvPipeline {
 
     // Running variable storing the parking position
     private volatile ParkingPosition position = ParkingPosition.LEFT;
+    public static int parcare=1;
 
 
     public Mat processFrame(Mat input) {
@@ -61,6 +63,7 @@ public class PowerPlayDeterminationExample extends OpenCvPipeline {
         // Change the bounding box color based on the sleeve color
         if (sumColors.val[0] == minColor) {
             position = ParkingPosition.CENTER;
+            parcare=2;
             Imgproc.rectangle(
                     input,
                     sleeve_pointA,
@@ -69,6 +72,7 @@ public class PowerPlayDeterminationExample extends OpenCvPipeline {
                     2
             );
         } else if (sumColors.val[1] == minColor) {
+            parcare=3;
             position = ParkingPosition.RIGHT;
             Imgproc.rectangle(
                     input,
@@ -79,6 +83,7 @@ public class PowerPlayDeterminationExample extends OpenCvPipeline {
             );
         } else {
             position = ParkingPosition.LEFT;
+            parcare=1;
             Imgproc.rectangle(
                     input,
                     sleeve_pointA,

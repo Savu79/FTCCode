@@ -50,7 +50,7 @@ public class DriverControl extends LinearOpMode {
     public static int patru=500;
     public static int cinci=900;
     public static int sase=1500;
-    public static int cleste=400;
+    public static int cleste=1000;
 
     ////Intake
     static double pozIntakeDeschis = 0.17;
@@ -359,14 +359,10 @@ public class DriverControl extends LinearOpMode {
                     break;
                 }
             case 4:
-                pozE=EBlocat;
-                pozServoExtindor=pozServoExtindor1;
-                if(timerCase4.milliseconds()>cleste){
-                    Intake.setPosition(pozIntakeDeschis);
-                    SWITCHSUS++;
-                    timerBrat.reset();
-                }
-
+                pozE=EInchis;
+                pozServoExtindor=pozServoExtindor5;
+                SWITCHSUS++;
+                timerBrat.reset();
                 break;
             case 5:
                 directieMotorBratSus=true;
