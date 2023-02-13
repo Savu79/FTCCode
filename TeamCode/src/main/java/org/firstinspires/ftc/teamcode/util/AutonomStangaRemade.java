@@ -7,7 +7,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -24,9 +23,9 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
-@Autonomous(name="AutonomRosuStanga")
+@Autonomous(name="AutonomStanga")
 @Config
-public class AutonomRosuStanga extends LinearOpMode {
+public class AutonomStangaRemade extends LinearOpMode {
 
     Servo Intake;
     Servo ServoExtindor;
@@ -37,24 +36,24 @@ public class AutonomRosuStanga extends LinearOpMode {
     DcMotorEx MotorBrat;
 
     //viteza
-    double vit=1;
+    double vit = 1;
 
     boolean schimb;
 
     //valori timere
-    static int zero=1000;
-    static int unu=1000;
-    static int doi=1400;
-    static int trei=1700;
-    static int patru=500;
-    static int cinci=900;
-    static int sase=1500;
+    static int zero = 1000;
+    static int unu = 1000;
+    static int doi = 1400;
+    static int trei = 1700;
+    static int patru = 500;
+    static int cinci = 900;
+    static int sase = 1500;
 
     //timer
-    ElapsedTime timerBrat= new ElapsedTime();
+    ElapsedTime timerBrat = new ElapsedTime();
     ElapsedTime timerCase1 = new ElapsedTime();
     ElapsedTime timerCase2 = new ElapsedTime();
-    ElapsedTime timerCase3= new ElapsedTime();
+    ElapsedTime timerCase3 = new ElapsedTime();
     ElapsedTime timerY = new ElapsedTime();
     ElapsedTime timerJos = new ElapsedTime();
     ElapsedTime timerMotorBrat = new ElapsedTime();
@@ -80,73 +79,74 @@ public class AutonomRosuStanga extends LinearOpMode {
     static double powerE = 1;
     int EBlocat;
     int pozE = 0;
-    int EInchis= 0;
+    int EInchis = 0;
     int EDeschis = 2700;
-    public int EPas =1250;
+    public int EPas = 1250;
     static double kx = 100;
 
     //Puta
-    double pozPutaCu=0.87;
-    double pozaPutaFara=1;
-    double pozPuta=pozaPutaFara;
+    double pozPutaCu = 0.87;
+    double pozaPutaFara = 1;
+    double pozPuta = pozaPutaFara;
 
     //MotorBrat
-    boolean directieMotorBratSus=false;
-    public static double Kcos=-0.41;
-    public static double PowerSin=0.1;
-    public static double PowerCos=0.2;
-    public static double Ksin=-0.7;
+    boolean directieMotorBratSus = false;
+    public static double Kcos = -0.41;
+    public static double PowerSin = 0.1;
+    public static double PowerCos = 0.2;
+    public static double Ksin = -0.7;
 
     //Brat
     int pozBratSus = 2200;
     int pozBratJos = 0;
-    int pozBrat=pozBratJos;
-    public static double powerB=0.6;
+    int pozBrat = pozBratJos;
+    public static double powerB = 0.6;
 
     ///Auto
-    boolean PaharSus=false;
-    boolean DejaSus=false;
-    boolean PaharJos=false;
-    boolean deMaiMulte=false;
-    int SWITCHSUS=1;
+    boolean PaharSus = false;
+    boolean DejaSus = false;
+    boolean PaharJos = false;
+    boolean deMaiMulte = false;
+    int SWITCHSUS = 1;
 
-    public static int pozToScoringStrafe=10;
-    public static int pozToScoringBack=35;
-    public static double pozToScoringHeading=130;
+    public static int pozToScoringStrafe = 10;
+    public static int pozToScoringBack = 35;
+    public static double pozToScoringHeading = 130;
+    public static int x=-10;
+    public static int y=95;
 
-    Pose2d RRpoz= new Pose2d(0, 0, 0);
+    Pose2d RRpoz = new Pose2d(0, 0, 0);
 
-    public static double valoare=140;
+    public static double valoare = 90;
 
-    public static int ParcareSt=10;
-    public static int ParcareDr=10;
-    public static int ParcareCt=10;
-    public static int ParcareBK=10;
-    boolean iesire=true;
-
-
+    public static int ParcareSt = 10;
+    public static int ParcareDr = 10;
+    public static int ParcareCt = 10;
+    public static int strafeptparcare = 10;
+    public static int fataptparcarest = 30;
+    public static int spateptparcaredr = 30;
+    boolean iesire = true;
 
 
     private PowerPlayDeterminationExample sleeveDetection;
     private OpenCvCamera phoneCam;
 
-    public void runOpMode(){
+    public void runOpMode() {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         sleeveDetection = new PowerPlayDeterminationExample();
         phoneCam.setPipeline(sleeveDetection);
         phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
 
-        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
+        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
-            public void onOpened()
-            {
-                phoneCam.startStreaming(320,240, OpenCvCameraRotation.UPSIDE_DOWN);
+            public void onOpened() {
+                phoneCam.startStreaming(320, 240, OpenCvCameraRotation.UPSIDE_DOWN);
             }
 
             @Override
-            public void onError(int errorCode) {}
+            public void onError(int errorCode) {
+            }
         });
 
         while (!isStarted()) {
@@ -156,13 +156,13 @@ public class AutonomRosuStanga extends LinearOpMode {
         }
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-        Intake       =hardwareMap.get(Servo.class, "Intake");
-        ServoExtindor=hardwareMap.get(Servo.class, "ServoExtindor");
-        ExtindorDr   =hardwareMap.get(DcMotorEx.class, "ExtindorDr");
-        ExtindorSt   =hardwareMap.get(DcMotorEx.class, "ExtindorSt");
-        Puta         =hardwareMap.get(Servo.class, "Puta");
-        Brat         =hardwareMap.get(DcMotorEx.class, "Brat");
-        MotorBrat    =hardwareMap.get(DcMotorEx.class, "MotorBrat");
+        Intake = hardwareMap.get(Servo.class, "Intake");
+        ServoExtindor = hardwareMap.get(Servo.class, "ServoExtindor");
+        ExtindorDr = hardwareMap.get(DcMotorEx.class, "ExtindorDr");
+        ExtindorSt = hardwareMap.get(DcMotorEx.class, "ExtindorSt");
+        Puta = hardwareMap.get(Servo.class, "Puta");
+        Brat = hardwareMap.get(DcMotorEx.class, "Brat");
+        MotorBrat = hardwareMap.get(DcMotorEx.class, "MotorBrat");
 
         Brat.setDirection(DcMotorSimple.Direction.REVERSE);
         ExtindorSt.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -183,69 +183,57 @@ public class AutonomRosuStanga extends LinearOpMode {
         Puta.setPosition(pozPutaCu);
 
 
-
-
         waitForStart();
 
 
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         TrajectorySequence traj1 = drive.trajectorySequenceBuilder(RRpoz)
-                .addTemporalMarker(0.5, () -> {
+                .addTemporalMarker(() -> {
+                    ServoExtindor.setPosition(0);
                     Intake.setPosition(pozIntakeDeschis);
                 })
                 .waitSeconds(0.5)
-                .forward(valoare/2.54)
+                .forward(toInch(valoare))
+                //.lineToConstantHeading(new Vector2d(x,y))
                 .build();
-
-
 
         TrajectorySequence traj2 = drive.trajectorySequenceBuilder(RRpoz)
-                .addTemporalMarker(0.6, () -> {
-                    Intake.setPosition(pozIntakeInchis);
-                    ServoExtindor.setPosition(pozServoExtindorMij);
-                })
-                .back(toInch(pozToScoringBack))
+                .waitSeconds(1)
+                .turn(toInch(pozToScoringHeading))
                 .build();
-
         TrajectorySequence traj3 = drive.trajectorySequenceBuilder(RRpoz)
-                .addTemporalMarker(0.3, () -> {
-                            ServoExtindor.setPosition(pozServoExtindor5);
-                })
-                .strafeLeft(toInch(pozToScoringStrafe))
-                .turn(Math.toRadians(pozToScoringHeading))
+                .turn(Math.toRadians(-(pozToScoringHeading-90)))
+                .strafeLeft(strafeptparcare)
                 .build();
 
-        TrajectorySequence traj4 = drive.trajectorySequenceBuilder(RRpoz)
-                        .turn(Math.toRadians(-pozToScoringHeading))
-                        .build();
-
-        Trajectory trajBK = drive.trajectoryBuilder(RRpoz)
-                .back(ParcareBK)
+        TrajectorySequence trajSt = drive.trajectorySequenceBuilder(RRpoz)
+                .forward(fataptparcarest)
                 .build();
 
-        Trajectory trajSt = drive.trajectoryBuilder(RRpoz)
-                        .strafeLeft(ParcareSt)
-                        .build();
-
-        Trajectory trajDr = drive.trajectoryBuilder(RRpoz)
-                        .strafeRight(ParcareDr)
-                        .build();
-
+        TrajectorySequence trajDr = drive.trajectorySequenceBuilder(RRpoz)
+                .back(spateptparcaredr)
+                .build();
 
         ServoExtindor.setPosition(0);
 
         drive.setPoseEstimate(RRpoz);
         drive.followTrajectorySequence(traj1);
-        RRpoz = drive.getPoseEstimate();
-        drive.setPoseEstimate(RRpoz);
-        drive.followTrajectorySequence(traj2);
-        RRpoz = drive.getPoseEstimate();
-        drive.setPoseEstimate(RRpoz);
-        drive.followTrajectorySequence(traj3);
-        RRpoz = drive.getPoseEstimate();
+        RRpoz=drive.getPoseEstimate();
         drive.setPoseEstimate(RRpoz);
 
+        timerMotorBrat.reset();
+        directieMotorBratSus=true;
+        while (timerMotorBrat.seconds() < 2)
+            MotorBrat.setPower(COSSIN(directieMotorBratSus));
+        MotorBrat.setPower(0);
+        Intake.setPosition(pozIntakeInchis);
+        ServoExtindor.setPosition(pozServoExtindorMij);
+
+        drive.followTrajectorySequence(traj2);
+        RRpoz=drive.getPoseEstimate();
+        drive.setPoseEstimate(RRpoz);
+/*
         timerBrat.reset();
 
         while(timerBrat.seconds()<4)
@@ -265,34 +253,23 @@ public class AutonomRosuStanga extends LinearOpMode {
         timerMotorBrat.reset();
         directieMotorBratSus=false;
 
-        while(timerMotorBrat.milliseconds()<2000)
+        while(timerMotorBrat.seconds()<2)
             MotorBrat.setPower(COSSIN(directieMotorBratSus));
 
         MotorBrat.setPower(0);
 
         ServoExtindor.setPosition(pozServoExtindorMij);
 
-        drive.followTrajectorySequence(traj4);
-        RRpoz = drive.getPoseEstimate();
+        drive.followTrajectorySequence(traj2);
+        RRpoz=drive.getPoseEstimate();
         drive.setPoseEstimate(RRpoz);
 
-        drive.followTrajectory(trajBK);
-        RRpoz = drive.getPoseEstimate();
-        drive.setPoseEstimate(RRpoz);
+        if(parcare==1)
+            drive.followTrajectorySequence(trajSt);
 
-        if(parcare==1){
-            drive.followTrajectory(trajSt);
-        }
-        if(parcare==3){
-            drive.followTrajectory(trajDr);
-        }
-    }
-    public double COSSIN(boolean directieMotorBratSus)
-    {
-        if(directieMotorBratSus)
-            return(Math.sin(Math.toRadians(MotorBrat.getCurrentPosition()/(537.7/360))) * Ksin+PowerSin);
-        else
-            return(Math.cos(Math.toRadians(MotorBrat.getCurrentPosition()/(357.7/360))) * Kcos-PowerCos);
+        if(parcare==3)
+            drive.followTrajectorySequence(trajDr);*/
+
     }
     void autoSegSus(){
         switch (SWITCHSUS){
@@ -368,6 +345,13 @@ public class AutonomRosuStanga extends LinearOpMode {
             DejaSus = false;
             deMaiMulte=false;
         }
+    }
+    public double COSSIN(boolean directieMotorBratSus)
+    {
+        if(directieMotorBratSus)
+            return(Math.sin(Math.toRadians(MotorBrat.getCurrentPosition()/(537.7/360))) * Ksin+PowerSin);
+        else
+            return(Math.cos(Math.toRadians(MotorBrat.getCurrentPosition()/(357.7/360))) * Kcos-PowerCos);
     }
     public double toCm(double value){
         return value*2.54;
