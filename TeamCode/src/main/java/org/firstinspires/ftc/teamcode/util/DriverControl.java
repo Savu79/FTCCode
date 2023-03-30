@@ -65,7 +65,7 @@ public class DriverControl extends LinearOpMode {
     static double pozServoExtindor3 = 0.15;
     static double pozServoExtindor4 = 0.21;
     static double pozServoExtindor5 = 0.25;
-    public static double pozServoExtindorPas = 0.67;
+    public static double pozServoExtindorPas = 0.585;
     static double pozServoExtindorJos = 0;
     static double pozServoExtindor = pozServoExtindor1;
 
@@ -93,7 +93,7 @@ public class DriverControl extends LinearOpMode {
     boolean GPy=true;
 
     //Brat
-    int pozBratSus = 2200;
+    public static int pozBratSus = 2250;
     int pozBratJos = 0;
     int pozBrat=pozBratJos;
     public static double powerB=0.6;
@@ -208,8 +208,6 @@ public class DriverControl extends LinearOpMode {
                 pozServoExtindor -= gamepad2.right_stick_y / 80;
             if(pozServoExtindor<0)
                 pozServoExtindor=0;
-            if(pozServoExtindor>pozServoExtindorMij)
-                pozServoExtindor=pozServoExtindorMij;
 
             //Mutare Brat -GP2
             if (gamepad2.right_trigger!=0 && pozBrat<=pozBratSus){
@@ -240,6 +238,10 @@ public class DriverControl extends LinearOpMode {
                 GPy=!GPy;
                 timerY.reset();
             }
+            /*if (gamepad2.dpad_up)
+            {
+                MotorBrat.setPower(0);
+            }*/
 
             //Mutare Intake -GP2
             if(gamepad2.a)
@@ -277,6 +279,7 @@ public class DriverControl extends LinearOpMode {
             telemetry.addData("Pozitie MotorBrat", MotorBrat.getCurrentPosition());
             telemetry.addData("Power MotorBrat ", MotorBrat.getCurrentPosition());
             telemetry.addData("EBlocat: ", EBlocat);
+            telemetry.addData("ServoExtindor: ", pozServoExtindor);
             telemetry.update();
         }
     }
@@ -345,7 +348,6 @@ public class DriverControl extends LinearOpMode {
                         pozIntake=pozIntakeInchis;
                         SWITCHSUS++;
                         timerCase3.reset();
-
                     }
                 }
                 break;
