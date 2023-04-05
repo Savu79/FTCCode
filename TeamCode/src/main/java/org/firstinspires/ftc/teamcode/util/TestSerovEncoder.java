@@ -36,28 +36,28 @@ public class TestSerovEncoder extends LinearOpMode{
     public static double ref=2150;
 
 
-    ElapsedTime timer = new ElapsedTime();
+    //ElapsedTime timer = new ElapsedTime();
 
     public void runOpMode (){
         servo = hardwareMap.get(CRServo.class, "servo");
         enc = new Encoder(hardwareMap.get(DcMotorEx.class, "encoder"));
-        enc.setDirection(Encoder.Direction.REVERSE);
+       // enc.setDirection(Encoder.Direction.REVERSE);
         waitForStart();
         while(opModeIsActive()){
-            /*if (enc.getCurrentPosition() < 2200 && enc.getCurrentPosition() > 2100)
+            if (enc.getCurrentPosition() < 2200 && enc.getCurrentPosition() > 2100)
             {
                 pow=0;
             }
             else if (enc.getCurrentPosition() < 2100)
             {
-                pow=0.1;
+                pow=0.7;
             }
             else if (enc.getCurrentPosition() > 2200)
             {
-                pow=-0.1;
-            }*/
+                pow=-0.7;
+            }
 
-            encoderPoz = enc.getCurrentPosition();
+            /*encoderPoz = enc.getCurrentPosition();
 
             error = ref - encoderPoz;
 
@@ -76,11 +76,13 @@ public class TestSerovEncoder extends LinearOpMode{
                 pow=pow+0.1;
             }
 
+             */
+
             servo.setPower(pow);
 
-            lastError=error;
+            //lastError=error;
 
-            timer.reset();
+            //timer.reset();
 
             telemetry.addData("Pozitie ", enc.getCurrentPosition());
             telemetry.addData("putere", pow);
